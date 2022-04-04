@@ -30,6 +30,18 @@ class ModelUnknownError(Exception):
 
 
 class Model:
+    """
+    A sparsechem model and its configuration
+
+    Args:
+        path (pathlib.Path): the path of the model's folder. Contains the files `hyperparameters.json` and `model.pth`.
+        "hyperparameters.json" should contain at least a "conf" dict with "input_transform" and "fold_inputs"
+
+    Raises:
+        FileNotFoundError: path / "hyperparameters.json" not found
+        FileNotFoundError: path / "model.pth" not found
+    """
+
     _conf: SimpleNamespace
     _model: sparsechem.SparseFFN
 
@@ -45,6 +57,15 @@ class Model:
 
     @property
     def conf(self) -> SimpleNamespace:
+        """
+        The configuration of the model, which contains the "conf" values of the "hyperparameters.json" as well as
+            - "model_type"
+            - "class_output_size"
+            - "regr_output_size"
+
+        Returns:
+            SimpleNamespace: Namespace sent by sparsechem
+        """
         if not hasattr(self, "_conf") or not self._conf:
             self._conf: SimpleNamespace = sparsechem.load_results(str(self._conf_path), two_heads=True)["conf"]
         return self._conf
@@ -92,32 +113,42 @@ class Model:
 
 
 class PredictionSystem:
-    """Prediction system exposes predictions for SMILES from model given on init"""
+    """
+    Prediction system exposes predictions for SMILES from model given on init
+
+    Args:
+        model_folder (pathlib.Path): The path of the folder which contains all the models.
+            Each model is a folder `model_name` (used in the `predict` function) which contains the files
+            `hyperparameters.json` and `model.pth`.
+        permutation_key (pathlib.Path): Path of the encryption key `json` used to shuffle the bits of the descriptors
+            (fingerprints) in `melloddy_tuner`.
+            Ex: `inputs/config/example_key.json`.
+        preparation_parameters (pathlib.Path): Path of the parameters `json` to be used to prepare the dataset with
+            `melloddy_tuner`.
+            Ex: `inputs/config/example_parameters.json`.
+            More details in `melloddy_tuner` `README.md`, `# Parameter definitions`.
+        device (str, optional): device used to load the model for the predictions. Defaults to "cpu".
+
+    Raises:
+        NotADirectoryError: `model_folder` is not a directory
+        ModelUnknownError: Requested model does not exist
+    """
 
     _device: str
     _tuner_encryption_key: pathlib.Path
     _tuner_configuration_parameters: pathlib.Path
-    _task_metadata: pathlib.Path
-    _reg_processed_metadata: pathlib.Path
-    _cls_processed_metadata: pathlib.Path
     _models: Dict[str, Model]
 
     def __init__(
         self,
         model_folder: pathlib.Path,
-        permutation_key: pathlib.Path,
+        encryption_key: pathlib.Path,
         preparation_parameters: pathlib.Path,
-        task_metadata: pathlib.Path,
-        reg_processed_metadata: pathlib.Path,
-        cls_processed_metadata: pathlib.Path,
         device: str = "cpu",
     ):
         self._device = device
-        self._tuner_encryption_key = permutation_key
+        self._tuner_encryption_key = encryption_key
         self._tuner_configuration_parameters = preparation_parameters
-        self._task_metadata = task_metadata
-        self._reg_processed_metadata = reg_processed_metadata
-        self._cls_processed_metadata = cls_processed_metadata
 
         if not os.path.isdir(model_folder):
             raise NotADirectoryError(f"{model_folder} is not a directory")
@@ -132,6 +163,16 @@ class PredictionSystem:
         data_file: pathlib.Path,
         output_dir: pathlib.Path,
     ) -> Namespace:
+        """
+        Build the data preparation args for `melloddy_tuner`
+
+        Args:
+            data_file (pathlib.Path): The path of the T2 structure input file (Smiles) in `csv` format.
+            output_dir (pathlib.Path): The directory used to output the preprocessed files.
+
+        Returns:
+            Namespace: The namespace used as input for `melloddy_tuner.tunercli.do_prepare_prediction`
+        """
         namespace: Dict[str, Any] = {}
 
         namespace[STRUCTURE_FILE] = str(data_file)
@@ -153,6 +194,18 @@ class PredictionSystem:
         return model
 
     def predict(self, model_name: str, smiles: pathlib.Path) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Predict on the test data (Smiles) with a given model.
+
+        Args:
+            model_name (str): the folder name of the model, which should be in the `model_folder` given at the init.
+                Contains the files `hyperparameters.json` and `model.pth`.
+            smiles (pathlib.Path): The test data. Path of the T2 structure input file (Smiles) in `csv` format.
+
+        Returns:
+            Tuple[np.ndarray, np.ndarray]: cls_pred and reg_pred, the predictions matrixes for classification and
+            regression tasks. For each array, the columns are the tasks and the rows are the samples.
+        """
         model = self._get_model(model_name)
 
         with tempfile.TemporaryDirectory("mms") as data_dir:

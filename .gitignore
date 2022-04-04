@@ -1,5 +1,3 @@
 *.egg-info
 .venv
 __pycache__
-out
-files

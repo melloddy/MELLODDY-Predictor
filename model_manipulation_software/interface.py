@@ -4,24 +4,19 @@ from model_manipulation_software.prediction_system import PredictionSystem
 
 
 def main():
-    models_path = pathlib.Path("/Users/apicosson/Documents/workspace/melloddy/mms/files/models")
-    permutation_key = pathlib.Path("/Users/apicosson/Documents/workspace/melloddy/mms/files/example_key.json")
-    preparation_parameter = pathlib.Path(
-        "/Users/apicosson/Documents/workspace/melloddy/mms/files/example_parameters.json"
-    )
-    task_metadata = pathlib.Path("/Users/apicosson/Documents/workspace/melloddy/mms/")
-    smiles_path = pathlib.Path("/Users/apicosson/Documents/workspace/melloddy/mms/files/T2_100samples.csv")
+
+    models_path = pathlib.Path("inputs/models")
+    encryption_key = pathlib.Path("inputs/config/example_key.json")
+    preparation_parameter = pathlib.Path("inputs/config/example_parameters.json")
+    smiles_path = pathlib.Path("inputs/data/T2_100samples.csv")
 
     predictor = PredictionSystem(
         model_folder=models_path,
-        permutation_key=permutation_key,
+        encryption_key=encryption_key,
         preparation_parameters=preparation_parameter,
-        task_metadata=task_metadata,
-        reg_processed_metadata="",
-        cls_processed_metadata="",
     )
 
-    cls_pred, reg_pred = predictor.predict("cls_mod_1", smiles_path)
+    cls_pred, reg_pred = predictor.predict("example_hybrid_model", smiles_path)
 
     print(cls_pred[:10])
 
