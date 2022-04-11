@@ -9,7 +9,7 @@ To install the package for developement run:
 ```
 git lfs install
 git clone git@github.com:owkin/melloddy_mms.git
-pip install -e ".[dev]"
+pip install -e ".[gitlab]"
 ```
 
 - Run the mms:
