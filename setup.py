@@ -26,5 +26,13 @@ setup(
         "rdkit-pypi==2021.9.5.1",
         "dask==2022.3.0",
     ],
-    extras_require={"dev": ["flake8==4.0.1", "black==22.1.0", "isort==5.10.1", "types-setuptools==57.4.11"]},
+    extras_require={
+        "dev": [
+            "flake8==4.0.1",
+            "flake8-bugbear==22.3.23",
+            "black==22.1.0",
+            "isort==5.10.1",
+            "types-setuptools==57.4.11",
+        ]
+    },
 )
