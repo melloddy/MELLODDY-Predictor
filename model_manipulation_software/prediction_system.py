@@ -1,6 +1,5 @@
 import os
 import pathlib
-import tempfile
 from argparse import Namespace
 from types import SimpleNamespace
 from typing import Any
@@ -17,7 +16,6 @@ from torch.utils.data import DataLoader
 STRUCTURE_FILE = "structure_file"
 CONFIG_FILE = "config_file"
 KEY_FILE = "key_file"
-OUTPUT_DIR = "output_dir"
 RUN_NAME = "run_name"
 NUMBER_CPU = "number_cpu"
 REF_HASH = "ref_hash"
@@ -161,7 +159,6 @@ class PredictionSystem:
     def _build_data_preparation_args(
         self,
         data_file: pathlib.Path,
-        output_dir: pathlib.Path,
     ) -> Namespace:
         """
         Build the data preparation args for `melloddy_tuner`
@@ -178,7 +175,6 @@ class PredictionSystem:
         namespace[STRUCTURE_FILE] = str(data_file)
         namespace[CONFIG_FILE] = str(self._tuner_configuration_parameters)
         namespace[KEY_FILE] = str(self._tuner_encryption_key)
-        namespace[OUTPUT_DIR] = str(output_dir)
         namespace[RUN_NAME] = PREPARATION_RUN_NAME
         namespace[NUMBER_CPU] = 1
         namespace[NON_INTERACTIVE] = True
@@ -208,19 +204,14 @@ class PredictionSystem:
         """
         model = self._get_model(model_name)
 
-        with tempfile.TemporaryDirectory("mms") as data_dir:
-            output_dir = pathlib.Path(data_dir)
-            melloddy_tuner.tunercli.do_prepare_prediction(
-                self._build_data_preparation_args(
-                    smiles,
-                    output_dir,
-                )
-            )
-            data_path = output_dir / PREPARATION_RUN_NAME / "matrices" / "pred_x.npz"
-            data = sparsechem.load_sparse(str(data_path))
-            data = sparsechem.fold_transform_inputs(
-                data, folding_size=model.fold_inputs, transform=model.input_transform
-            )
+        df = melloddy_tuner.utils.helper.read_input_file(str(smiles))
+        data = melloddy_tuner.tunercli.do_prepare_prediction_online(
+            self._build_data_preparation_args(
+                smiles,
+            ),
+            df,
+        )
+        data = sparsechem.fold_transform_inputs(data, folding_size=model.fold_inputs, transform=model.input_transform)
 
         y_class = sparsechem.load_check_sparse(filename=None, shape=(data.shape[0], model.class_output_size))
         y_regr = sparsechem.load_check_sparse(filename=None, shape=(data.shape[0], model.regr_output_size))

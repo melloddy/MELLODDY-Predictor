@@ -16,7 +16,7 @@ setup(
         "console_scripts": ["mms=model_manipulation_software:main"],
     },
     install_requires=[
-        "melloddy_tuner@git+ssh://git@git.infra.melloddy.eu/wp1/data_prep.git@master",
+        "melloddy_tuner@git+ssh://git@git.infra.melloddy.eu/wp1/data_prep.git@develop",
         "sparsechem@git+ssh://git@git.infra.melloddy.eu/wp2/sparsechem.git@master",
         "numpy==1.22.3",
         "pandas==1.4.1",
