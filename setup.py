@@ -12,9 +12,6 @@ setup(
     name="model_manipulation_software",
     version=about["__version__"],
     packages=find_packages(),
-    entry_points={
-        "console_scripts": ["mms=model_manipulation_software:main"],
-    },
     install_requires=[
         "numpy==1.22.3",
         "pandas==1.4.1",
