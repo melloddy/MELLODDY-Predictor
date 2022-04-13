@@ -21,6 +21,7 @@ setup(
         "rdkit-pypi==2021.9.5.1",
         "dask==2022.3.0",
         "torch==1.8.1",
+        "pandas==1.4.1",
     ],
     extras_require={
         "gitlab": [

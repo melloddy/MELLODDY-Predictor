@@ -9,6 +9,7 @@ from typing import Tuple
 import melloddy_tuner.tunercli  # type: ignore
 import melloddy_tuner.utils.helper  # type: ignore
 import numpy as np
+import pandas as pd
 import sparsechem  # type: ignore
 import torch
 from torch.utils.data import DataLoader
@@ -204,8 +205,8 @@ class PredictionSystem:
         """
         model = self._get_model(model_name)
 
-        df = melloddy_tuner.utils.helper.read_input_file(str(smiles))
-        data = melloddy_tuner.tunercli.do_prepare_prediction_online(
+        df: pd.DataFrame = melloddy_tuner.utils.helper.read_input_file(str(smiles))
+        data, _ = melloddy_tuner.tunercli.do_prepare_prediction_online(
             self._build_data_preparation_args(
                 smiles,
             ),
