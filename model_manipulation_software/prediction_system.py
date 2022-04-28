@@ -1,8 +1,6 @@
 import os
 import pathlib
-from argparse import Namespace
 from types import SimpleNamespace
-from typing import Any
 from typing import Dict
 from typing import Tuple
 
@@ -12,6 +10,7 @@ import numpy as np
 import pandas as pd
 import sparsechem  # type: ignore
 import torch
+from pandas.core.frame import DataFrame
 from torch.utils.data import DataLoader
 
 STRUCTURE_FILE = "structure_file"
@@ -85,6 +84,21 @@ class Model:
     def input_transform(self) -> str:
         return self.conf.input_transform
 
+    @property
+    def reg_metadata(self) -> pd.DataFrame:
+        return self._load_metadata("T8_reg.csv")
+
+    @property
+    def cls_metadata(self) -> pd.DataFrame:
+        return self._load_metadata("T8_cls.csv")
+
+    def _load_metadata(self, filename) -> pd.DataFrame:
+        metadata_file = self.path / filename
+        if not os.path.isfile(metadata_file):
+            raise FileNotFoundError(metadata_file)
+        data = pd.read_csv(metadata_file)
+        return data if isinstance(data, pd.DataFrame) else DataFrame()
+
     def load(self, device: str = "cpu") -> None:
         """Loads the model on the specified device
 
@@ -145,43 +159,21 @@ class PredictionSystem:
         preparation_parameters: pathlib.Path,
         device: str = "cpu",
     ):
-        self._device = device
-        self._tuner_encryption_key = encryption_key
-        self._tuner_configuration_parameters = preparation_parameters
-
         if not os.path.isdir(model_folder):
             raise NotADirectoryError(f"{model_folder} is not a directory")
+        if not os.path.isfile(encryption_key):
+            raise FileNotFoundError(encryption_key)
+        if not os.path.isfile(preparation_parameters):
+            raise FileNotFoundError(preparation_parameters)
+
+        self._device = device
 
         self._models = {}
-
         for dirname in os.listdir(model_folder):
             self._models[dirname] = Model(model_folder / dirname)
 
-    def _build_data_preparation_args(
-        self,
-        data_file: pathlib.Path,
-    ) -> Namespace:
-        """
-        Build the data preparation args for `melloddy_tuner`
-
-        Args:
-            data_file (pathlib.Path): The path of the T2 structure input file (Smiles) in `csv` format.
-            output_dir (pathlib.Path): The directory used to output the preprocessed files.
-
-        Returns:
-            Namespace: The namespace used as input for `melloddy_tuner.tunercli.do_prepare_prediction`
-        """
-        namespace: Dict[str, Any] = {}
-
-        namespace[STRUCTURE_FILE] = str(data_file)
-        namespace[CONFIG_FILE] = str(self._tuner_configuration_parameters)
-        namespace[KEY_FILE] = str(self._tuner_encryption_key)
-        namespace[RUN_NAME] = PREPARATION_RUN_NAME
-        namespace[NUMBER_CPU] = 1
-        namespace[NON_INTERACTIVE] = True
-        namespace[REF_HASH] = None
-
-        return Namespace(**namespace)
+        self._tuner_encryption_key = encryption_key
+        self._tuner_configuration_parameters = preparation_parameters
 
     def _get_model(self, model_name: str) -> Model:
         try:
@@ -190,7 +182,7 @@ class PredictionSystem:
             raise ModelUnknownError("Requested model does not exist")
         return model
 
-    def predict(self, model_name: str, smiles: pathlib.Path) -> Tuple[np.ndarray, np.ndarray]:
+    def predict(self, model_name: str, smiles: pathlib.Path) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """
         Predict on the test data (Smiles) with a given model.
 
@@ -206,12 +198,14 @@ class PredictionSystem:
         model = self._get_model(model_name)
 
         df: pd.DataFrame = melloddy_tuner.utils.helper.read_input_file(str(smiles))
-        data, _ = melloddy_tuner.tunercli.do_prepare_prediction_online(
-            self._build_data_preparation_args(
-                smiles,
-            ),
-            df,
+        data, df_failed, compound_mapping = melloddy_tuner.tunercli.do_prepare_prediction_online(
+            input_structure=df,
+            key_path=self._tuner_encryption_key,
+            config_file=self._tuner_configuration_parameters,
+            num_cpu=1,
         )
+        compound_ids = compound_mapping["input_compound_id"].reset_index().drop("index", axis=1)
+
         data = sparsechem.fold_transform_inputs(data, folding_size=model.fold_inputs, transform=model.input_transform)
 
         y_class = sparsechem.load_check_sparse(filename=None, shape=(data.shape[0], model.class_output_size))
@@ -224,4 +218,33 @@ class PredictionSystem:
 
         model.load(self._device)
 
-        return model.predict(loader)
+        cls_pred, reg_pred = model.predict(loader)
+
+        if cls_pred.shape[1] != 0:
+            cls_pred_df = map_task_ids(metadata=model.cls_metadata, pred=cls_pred, pb_type="classification")
+        else:
+            cls_pred_df = pd.DataFrame(cls_pred)
+
+        cls_pred_df = map_compound_ids(compound_ids, cls_pred_df)
+
+        if reg_pred.shape[1] != 0:
+            reg_pred_df = map_task_ids(metadata=model.reg_metadata, pred=cls_pred, pb_type="regression")
+        else:
+            reg_pred_df = pd.DataFrame(reg_pred)
+
+        reg_pred_df = map_compound_ids(compound_ids, reg_pred_df)
+
+        return cls_pred_df, reg_pred_df, df_failed
+
+
+def map_task_ids(metadata: pd.DataFrame, pred: np.ndarray, pb_type: str):
+    metadata_df = metadata.dropna(subset=[f"cont_{pb_type}_task_id"])
+    if metadata_df is not None:
+        tasks = metadata_df["input_assay_id"].astype(str) + "_" + metadata_df["threshold"].astype(str)
+        return pd.DataFrame(pred, columns=tasks)
+    else:
+        raise RuntimeError("Cannot map an empty tasks DataFrame")
+
+
+def map_compound_ids(compound_ids: pd.DataFrame, predictions: pd.DataFrame) -> pd.DataFrame:
+    return pd.concat([compound_ids, predictions], axis=1)
