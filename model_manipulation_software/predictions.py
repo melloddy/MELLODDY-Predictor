@@ -1,3 +1,5 @@
+from typing import Union
+
 import numpy as np
 import pandas as pd
 
@@ -23,8 +25,9 @@ class Prediction:
             tasks = filtered_metadata["input_assay_id"].astype(str) + "_" + filtered_metadata["threshold"].astype(str)
             self.pred.columns = tasks
 
-    def map_compound_ids(self, compound_ids: pd.DataFrame) -> None:
+    def map_compound_ids(self, compound_ids: Union[pd.DataFrame, pd.Series]) -> None:
         self.pred = pd.concat([compound_ids, self.pred], axis=1)
+        self.pred.set_index("input_compound_id", drop=True, inplace=True)
 
 
 class ClassificationPrediction(Prediction):

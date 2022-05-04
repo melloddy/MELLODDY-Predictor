@@ -106,12 +106,12 @@ class Model:
         Returns:
             Tuple[np.ndarray, np.ndarray]: first item is classification matrix and second is regression matrix
         """
-        cls, reg = sparsechem.predict(
+        cls, reg = sparsechem.predict_sparse(
             net=self._model, loader=data, dev=self._device, dropout=0, progress=False, y_cat_columns=None
         )
 
-        cls = ClassificationPrediction(cls)
-        reg = RegressionPrediction(reg)
+        cls = ClassificationPrediction(cls.toarray())
+        reg = RegressionPrediction(reg.toarray())
 
         if cls.has_tasks():
             cls.map_task_ids(self._cls_metadata)

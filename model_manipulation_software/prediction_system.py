@@ -1,12 +1,16 @@
 import os
 import pathlib
 from typing import Dict
+from typing import Optional
 from typing import Tuple
 
 import melloddy_tuner.tunercli  # type: ignore
 import melloddy_tuner.utils.helper  # type: ignore
+import numpy as np
 import pandas as pd
 import sparsechem  # type: ignore
+from scipy.sparse import csr_matrix  # type: ignore
+from scipy.sparse import lil_matrix  # type: ignore
 from torch.utils.data import DataLoader
 
 from model_manipulation_software.model import Model
@@ -82,7 +86,13 @@ class PredictionSystem:
             raise ModelUnknownError("Requested model does not exist")
         return model
 
-    def predict(self, model_name: str, smiles: pathlib.Path) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    def predict(
+        self,
+        model_name: str,
+        smiles: pathlib.Path,
+        classification_tasks: Optional[list[int]] = None,
+        regression_tasks: Optional[list[int]] = None,
+    ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """
         Predict on the test data (Smiles) with a given model.
 
@@ -90,6 +100,10 @@ class PredictionSystem:
             model_name (str): the folder name of the model, which should be in the `model_folder` given at the init.
                 Contains the files `hyperparameters.json` and `model.pth`.
             smiles (pathlib.Path): The test data. Path of the T2 structure input file (Smiles) in `csv` format.
+            classification_tasks: A list of tasks for which you want to predict. If not set it will predict on all
+                classification tasks. If you don't want to predict on any tasks you can send an empty list.
+            regression_tasks: A list of tasks for which you want to predict. If not set it will predict on all
+                regression tasks. If you don't want to predict on any tasks you can sent an empty list.
 
         Returns:
             Tuple[np.ndarray, np.ndarray]: cls_pred and reg_pred, the predictions matrixes for classification and
@@ -100,18 +114,18 @@ class PredictionSystem:
         df: pd.DataFrame = melloddy_tuner.utils.helper.read_input_file(str(smiles))
         data, df_failed, compound_mapping = melloddy_tuner.tunercli.do_prepare_prediction_online(
             input_structure=df,
-            key_path=self._tuner_encryption_key,
-            config_file=self._tuner_configuration_parameters,
+            key_path=str(self._tuner_encryption_key),
+            config_file=str(self._tuner_configuration_parameters),
             num_cpu=1,
         )
         compound_ids = compound_mapping["input_compound_id"].reset_index().drop("index", axis=1)
 
         data = sparsechem.fold_transform_inputs(data, folding_size=model.fold_inputs, transform=model.input_transform)
 
-        y_class = sparsechem.load_check_sparse(filename=None, shape=(data.shape[0], model.class_output_size))
-        y_regr = sparsechem.load_check_sparse(filename=None, shape=(data.shape[0], model.regr_output_size))
+        classification_mask = prediction_mask((data.shape[0], int(model.class_output_size)), classification_tasks)
+        regression_mask = prediction_mask((data.shape[0], int(model.regr_output_size)), regression_tasks)
 
-        dataset_te = sparsechem.ClassRegrSparseDataset(x=data, y_class=y_class, y_regr=y_regr)
+        dataset_te = sparsechem.ClassRegrSparseDataset(x=data, y_class=classification_mask, y_regr=regression_mask)
         loader = DataLoader(
             dataset=dataset_te, batch_size=4000, num_workers=4, pin_memory=True, collate_fn=dataset_te.collate
         )
@@ -124,3 +138,19 @@ class PredictionSystem:
             pred.map_compound_ids(compound_ids)
 
         return cls_pred.dataframe, reg_pred.dataframe, df_failed
+
+
+def prediction_mask(shape: Tuple[int, int], tasks_ids: Optional[list[int]]) -> csr_matrix:
+    """produce a mask that will be used for prediction
+
+    Based on tasks_ids, we fill the columns with 1 to produce a mask that will generate prediction for this columns
+    if tasks_ids is set to None we predict for all columns. If set to [] we don't predict for any column.
+    """
+    mask = lil_matrix(shape, dtype=np.float32)
+
+    if tasks_ids is None:
+        mask[:, :] = 1
+    elif len(tasks_ids) != 0:
+        mask[:, tasks_ids] = 1
+
+    return mask.tocsr()
