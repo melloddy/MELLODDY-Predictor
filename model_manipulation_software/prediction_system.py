@@ -129,6 +129,7 @@ class PredictionSystem:
             num_cpu=1,
         )
         compound_ids = compound_mapping["input_compound_id"].reset_index().drop("index", axis=1)
+        assert compound_ids["input_compound_id"].is_unique
 
         data = sparsechem.fold_transform_inputs(data, folding_size=model.fold_inputs, transform=model.input_transform)
 
