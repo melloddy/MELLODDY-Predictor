@@ -7,4 +7,4 @@ mypy==0.942
 pytest==7.1.1
 pytest-cov==3.0.0
 pandas-stubs==1.2.0.57
-
+pdoc3==0.10.0

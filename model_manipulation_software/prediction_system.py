@@ -31,20 +31,22 @@ class ModelUnknownError(Exception):
 
 class PredictionSystem:
     """
-    Prediction system exposes predictions for SMILES from model given on init
+    Initialize the prediction system of the model manipulation software.
 
     Args:
         model_folder (pathlib.Path): The path of the folder which contains all the models.
-            Each model is a folder `model_name` (used in the `predict` function) which contains the files
-            `hyperparameters.json` and `model.pth`.
-        permutation_key (pathlib.Path): Path of the encryption key `json` used to shuffle the bits of the descriptors
+            Each `model` is a folder `model_name` (used in the `predict` function) which contains:
+            - a `configuration` file `hyperparameters.json`
+            - a `model checkpoint` file `model.pth`
+            - `metadata` file(s) `T8_cls.csv` and/or `T8_reg.csv`
+        encryption_key (pathlib.Path): Path of the encryption key `json` used to shuffle the bits of the descriptors
             (fingerprints) in `melloddy_tuner`.
             Ex: `inputs/config/example_key.json`.
         preparation_parameters (pathlib.Path): Path of the parameters `json` to be used to prepare the dataset with
             `melloddy_tuner`.
             Ex: `inputs/config/example_parameters.json`.
-            More details in `melloddy_tuner` `README.md`, `# Parameter definitions`.
-        device (str, optional): device used to load the model for the predictions. Defaults to "cpu".
+            More details in `melloddy_tuner`'s `README.md`, Section `# Parameter definitions`.
+        device (str, optional): device used to load the model for the predictions. Defaults to `cpu`.
 
     Raises:
         NotADirectoryError: `model_folder` is not a directory
@@ -98,16 +100,24 @@ class PredictionSystem:
 
         Args:
             model_name (str): the folder name of the model, which should be in the `model_folder` given at the init.
-                Contains the files `hyperparameters.json` and `model.pth`.
             smiles (pathlib.Path): The test data. Path of the T2 structure input file (Smiles) in `csv` format.
-            classification_tasks: A list of tasks for which you want to predict. If not set it will predict on all
-                classification tasks. If you don't want to predict on any tasks you can send an empty list.
-            regression_tasks: A list of tasks for which you want to predict. If not set it will predict on all
-                regression tasks. If you don't want to predict on any tasks you can sent an empty list.
+            classification_tasks: A list of tasks indexes (`cont_classification_task_id` from the `metadata file`) for
+                which you want to predict. If not set it will predict on all classification tasks. If you don't want
+                to predict on any tasks you can send an empty list.
+            regression_tasks: A list of tasks indexes (`cont_regression_task_id` from the `metadata file`) for which
+                you want to predict. If not set it will predict on all regression tasks. If you don't want to predict
+                on any tasks you can sent an empty list.
 
         Returns:
-            Tuple[np.ndarray, np.ndarray]: cls_pred and reg_pred, the predictions matrixes for classification and
-            regression tasks. For each array, the columns are the tasks and the rows are the samples.
+            Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]: `cls_pred`, `reg_pred` and `failed_smiles`.
+            - `cls_pred`: the prediction dataframe for classification tasks: the columns are the tasks
+                (`input_assay_id`_`threshold` from the `classification metadata` file) and the rows are the compounds
+                ids (`input_compound_id` from the `smiles` file).
+            - `reg_pred`: the prediction dataframe for regression tasks: the columns are the tasks (`input_assay_id`
+                from the `regression metadata` file) and the rows are the compounds ids (`input_compound_id` from the
+                `smiles` file).
+            - `failed_smiles`: the smiles which can't be processed. The rows are the compounds ids (`input_compound_id`
+                from the `smiles` file), and the column `error_message` contains the error returned by `melloddy_tuner`
         """
         model = self._get_model(model_name)
 
