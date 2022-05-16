@@ -91,7 +91,7 @@ class PredictionSystem:
     def predict(
         self,
         model_name: str,
-        smiles: pathlib.Path,
+        smiles: pd.DataFrame,
         classification_tasks: Optional[list[int]] = None,
         regression_tasks: Optional[list[int]] = None,
     ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -100,7 +100,7 @@ class PredictionSystem:
 
         Args:
             model_name (str): the folder name of the model, which should be in the `model_folder` given at the init.
-            smiles (pathlib.Path): The test data. Path of the T2 structure input file (Smiles) in `csv` format.
+            smiles (pd.DataFrame): The test data. A loaded T2 structure.
             classification_tasks: A list of tasks indexes (`cont_classification_task_id` from the `metadata file`) for
                 which you want to predict. If not set it will predict on all classification tasks. If you don't want
                 to predict on any tasks you can send an empty list.
@@ -121,9 +121,8 @@ class PredictionSystem:
         """
         model = self._get_model(model_name)
 
-        df: pd.DataFrame = melloddy_tuner.utils.helper.read_input_file(str(smiles))
         data, df_failed, compound_mapping = melloddy_tuner.tunercli.do_prepare_prediction_online(
-            input_structure=df,
+            input_structure=smiles,
             key_path=str(self._tuner_encryption_key),
             config_file=str(self._tuner_configuration_parameters),
             num_cpu=1,

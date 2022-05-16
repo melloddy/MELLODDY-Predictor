@@ -1,6 +1,7 @@
 import os
 import pathlib
 
+import melloddy_tuner.utils.helper  # type: ignore
 import pandas as pd
 import pytest
 
@@ -38,7 +39,8 @@ def test_prediction_system(model, expected_values, expected_shapes):
         preparation_parameters=PREPARATION_PARAMETER,
     )
 
-    cls_pred, reg_pred, failing_smiles = predictor.predict(model, SMILES_PATH)
+    df: pd.DataFrame = melloddy_tuner.utils.helper.read_input_file(str(SMILES_PATH))
+    cls_pred, reg_pred, failing_smiles = predictor.predict(model, df)
 
     # This is definitely not a great test but it is better than nothing
     assert failing_smiles.empty  # no failing data
@@ -64,7 +66,8 @@ def test_prediction_on_subset_of_tasks():
         preparation_parameters=PREPARATION_PARAMETER,
     )
 
-    cls_pred, _, _ = predictor.predict("example_cls_model", SMILES_PATH, [24])
+    df: pd.DataFrame = melloddy_tuner.utils.helper.read_input_file(str(SMILES_PATH))
+    cls_pred, _, _ = predictor.predict("example_cls_model", df, [24])
 
     assert cls_pred.iloc[0][1] == 0
     assert cls_pred.iloc[0][24] == pytest.approx(0.34870466589927673)
@@ -86,7 +89,8 @@ def test_failing_smiles(tmp_path):
         preparation_parameters=preparation_parameter,
     )
 
-    cls_pred, reg_pred, failing_smiles = predictor.predict("example_cls_model", failing_smiles_path)
+    df: pd.DataFrame = melloddy_tuner.utils.helper.read_input_file(str(failing_smiles_path))
+    cls_pred, reg_pred, failing_smiles = predictor.predict("example_cls_model", df)
 
     # This is definitely not a great test but it is better than nothing
     # cls model:
