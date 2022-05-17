@@ -60,13 +60,10 @@ class PredictionSystem:
 
     def __init__(
         self,
-        model_folder: pathlib.Path,
         encryption_key: pathlib.Path,
         preparation_parameters: pathlib.Path,
         device: str = "cpu",
     ):
-        if not os.path.isdir(model_folder):
-            raise NotADirectoryError(f"{model_folder} is not a directory")
         if not os.path.isfile(encryption_key):
             raise FileNotFoundError(encryption_key)
         if not os.path.isfile(preparation_parameters):
@@ -75,22 +72,13 @@ class PredictionSystem:
         self._device = device
 
         self._models = {}
-        for dirname in os.listdir(model_folder):
-            self._models[dirname] = Model(model_folder / dirname)
 
         self._tuner_encryption_key = encryption_key
         self._tuner_configuration_parameters = preparation_parameters
 
-    def _get_model(self, model_name: str) -> Model:
-        try:
-            model = self._models[model_name]
-        except KeyError:
-            raise ModelUnknownError("Requested model does not exist")
-        return model
-
     def predict(
         self,
-        model_name: str,
+        model: Model,
         smiles: pd.DataFrame,
         classification_tasks: Optional[list[int]] = None,
         regression_tasks: Optional[list[int]] = None,
@@ -99,7 +87,7 @@ class PredictionSystem:
         Predict on the test data (Smiles) with a given model.
 
         Args:
-            model_name (str): the folder name of the model, which should be in the `model_folder` given at the init.
+            model (Model): the model you want to use to perform predictions
             smiles (pd.DataFrame): The test data. A loaded T2 structure.
             classification_tasks: A list of tasks indexes (`cont_classification_task_id` from the `metadata file`) for
                 which you want to predict. If not set it will predict on all classification tasks. If you don't want
@@ -119,8 +107,6 @@ class PredictionSystem:
             - `failed_smiles`: the smiles which can't be processed. The rows are the compounds ids (`input_compound_id`
                 from the `smiles` file), and the column `error_message` contains the error returned by `melloddy_tuner`
         """
-        model = self._get_model(model_name)
-
         data, df_failed, compound_mapping = melloddy_tuner.tunercli.do_prepare_prediction_online(
             input_structure=smiles,
             key_path=str(self._tuner_encryption_key),

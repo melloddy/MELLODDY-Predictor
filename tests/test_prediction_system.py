@@ -5,6 +5,7 @@ import melloddy_tuner.utils.helper  # type: ignore
 import pandas as pd
 import pytest
 
+from model_manipulation_software import Model
 from model_manipulation_software import PredictionSystem
 
 TEST_FILE_DIR = os.path.dirname(__file__)
@@ -34,13 +35,12 @@ SMILES_PATH = pathlib.Path(f"{TEST_FILE_DIR}/../inputs/data/T2_100samples.csv")
 @pytest.mark.slow
 def test_prediction_system(model, expected_values, expected_shapes):
     predictor = PredictionSystem(
-        model_folder=MODELS_PATH,
         encryption_key=ENCRYPTION_KEY,
         preparation_parameters=PREPARATION_PARAMETER,
     )
 
     df: pd.DataFrame = melloddy_tuner.utils.helper.read_input_file(str(SMILES_PATH))
-    cls_pred, reg_pred, failing_smiles = predictor.predict(model, df)
+    cls_pred, reg_pred, failing_smiles = predictor.predict(Model(MODELS_PATH / model), df)
 
     # This is definitely not a great test but it is better than nothing
     assert failing_smiles.empty  # no failing data
@@ -61,22 +61,18 @@ def test_prediction_system(model, expected_values, expected_shapes):
 
 def test_prediction_on_subset_of_tasks():
     predictor = PredictionSystem(
-        model_folder=MODELS_PATH,
         encryption_key=ENCRYPTION_KEY,
         preparation_parameters=PREPARATION_PARAMETER,
     )
 
     df: pd.DataFrame = melloddy_tuner.utils.helper.read_input_file(str(SMILES_PATH))
-    cls_pred, _, _ = predictor.predict("example_cls_model", df, [24])
+    cls_pred, _, _ = predictor.predict(Model(MODELS_PATH / "example_cls_model"), df, [24])
 
     assert cls_pred.iloc[0][1] == 0
     assert cls_pred.iloc[0][24] == pytest.approx(0.34870466589927673)
 
 
 def test_failing_smiles(tmp_path):
-    models_path = pathlib.Path(f"{TEST_FILE_DIR}/../inputs/models")
-    encryption_key = pathlib.Path(f"{TEST_FILE_DIR}/../inputs/config/example_key.json")
-    preparation_parameter = pathlib.Path(f"{TEST_FILE_DIR}/../inputs/config/example_parameters.json")
     smiles_path = pathlib.Path(f"{TEST_FILE_DIR}/../inputs/data/T2_100samples_failing.csv")
 
     smiles = pd.read_csv(smiles_path)
@@ -84,13 +80,12 @@ def test_failing_smiles(tmp_path):
     smiles.to_csv(failing_smiles_path, columns=["input_compound_id", "smiles"])
 
     predictor = PredictionSystem(
-        model_folder=models_path,
-        encryption_key=encryption_key,
-        preparation_parameters=preparation_parameter,
+        encryption_key=ENCRYPTION_KEY,
+        preparation_parameters=PREPARATION_PARAMETER,
     )
 
     df: pd.DataFrame = melloddy_tuner.utils.helper.read_input_file(str(failing_smiles_path))
-    cls_pred, reg_pred, failing_smiles = predictor.predict("example_cls_model", df)
+    cls_pred, reg_pred, failing_smiles = predictor.predict(Model(MODELS_PATH / "example_cls_model"), df)
 
     # This is definitely not a great test but it is better than nothing
     # cls model:

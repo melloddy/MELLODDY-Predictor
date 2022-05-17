@@ -12,6 +12,7 @@ Example:
 
 """
 
+from model_manipulation_software.model import Model
 from model_manipulation_software.prediction_system import PredictionSystem
 
-__all__ = ["PredictionSystem"]
+__all__ = ["PredictionSystem", "Model"]
