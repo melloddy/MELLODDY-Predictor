@@ -1,6 +1,7 @@
 import os
 import pathlib
 from typing import Dict
+from typing import List
 from typing import Optional
 from typing import Tuple
 
@@ -80,8 +81,8 @@ class PredictionSystem:
         self,
         model: Model,
         smiles: pd.DataFrame,
-        classification_tasks: Optional[list[int]] = None,
-        regression_tasks: Optional[list[int]] = None,
+        classification_tasks: Optional[List[int]] = None,
+        regression_tasks: Optional[List[int]] = None,
     ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """
         Predict on the test data (Smiles) with a given model.
@@ -136,7 +137,7 @@ class PredictionSystem:
         return cls_pred.dataframe, reg_pred.dataframe, df_failed
 
 
-def prediction_mask(shape: Tuple[int, int], tasks_ids: Optional[list[int]]) -> csr_matrix:
+def prediction_mask(shape: Tuple[int, int], tasks_ids: Optional[List[int]]) -> csr_matrix:
     """produce a mask that will be used for prediction
 
     Based on tasks_ids, we fill the columns with 1 to produce a mask that will generate prediction for this columns

@@ -2,7 +2,7 @@
 
 ## Installation
 
-To install the package, run in a new python 3.9+ environment:
+To install the package, run in a new python 3.8+ environment:
 
 1. Install [git lfs](https://git-lfs.github.com/)
 

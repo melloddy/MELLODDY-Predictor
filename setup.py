@@ -10,6 +10,7 @@ with version_path.open("r", encoding="utf-8") as fp:
 
 setup(
     name="model_manipulation_software",
+    python_requires=">=3.8.0",
     version=about["__version__"],
     packages=find_packages(),
     install_requires=[
