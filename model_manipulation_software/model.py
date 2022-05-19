@@ -19,14 +19,22 @@ class Model:
 
     Args:
         path (pathlib.Path): the path of the model's folder.
-            Contains:
+            The directory structure inside this folder should be the following:
 
-            * a configuration file `hyperparameters.json`: should contain at least a "conf" dict with
-                "input_transform" and "fold_inputs".
-            * a model checkpoint file `model.pth`
-            * metadata file(s) `T8_cls.csv` and/or `T8_reg.csv`
+                my_model/
+                ├─ hyperparameters.json
+                ├─ model.pth
+                ├─ T8_cls.csv
+                ├─ T8_reg.csv
 
-            The model should be compatible with sparsechem 0.9.6+. If it is not, you can convert it with
+            The `hyperparameters` file should contain at least a `conf` key with informations about the model.
+            The T8 metadata files should be provided based on the kind of the model:
+
+            * CLS model: `T8_cls`.
+            * REG model: `T8_reg`.
+            * HYB model: `T8_cls` and `T8_reg`.
+
+            The model should be compatible with `sparsechem` `0.9.6+`. If it is not, you can convert it with
             [this script](https://git.infra.melloddy.eu/wp2/sparsechem/-/blob/convert_v0.9.5_to_v0.9.6/examples/chembl/convert.py).
 
     Raises:
@@ -34,7 +42,7 @@ class Model:
         FileNotFoundError: path / "model.pth" not found
     """  # noqa: E501
 
-    _conf: SimpleNamespace
+    _internal_conf: SimpleNamespace
     _model: sparsechem.SparseFFN
 
     def __init__(self, path: pathlib.Path) -> None:
@@ -48,7 +56,7 @@ class Model:
             raise FileNotFoundError(self._model_path)
 
     @property
-    def conf(self) -> SimpleNamespace:
+    def _conf(self) -> SimpleNamespace:
         """
         The configuration of the model, which contains the "conf" values of the "hyperparameters.json" as well as
             - "model_type"
@@ -58,25 +66,25 @@ class Model:
         Returns:
             SimpleNamespace: Namespace sent by sparsechem
         """
-        if not hasattr(self, "_conf") or not self._conf:
-            self._conf: SimpleNamespace = sparsechem.load_results(str(self._conf_path), two_heads=True)["conf"]
-        return self._conf
+        if not hasattr(self, "_internal_conf") or not self._internal_conf:
+            self._internal_conf: SimpleNamespace = sparsechem.load_results(str(self._conf_path), two_heads=True)["conf"]
+        return self._internal_conf
 
     @property
     def class_output_size(self) -> str:
-        return self.conf.class_output_size
+        return self._conf.class_output_size
 
     @property
     def regr_output_size(self) -> str:
-        return self.conf.regr_output_size
+        return self._conf.regr_output_size
 
     @property
     def fold_inputs(self) -> str:
-        return self.conf.fold_inputs
+        return self._conf.fold_inputs
 
     @property
     def input_transform(self) -> str:
-        return self.conf.input_transform
+        return self._conf.input_transform
 
     @property
     def _reg_metadata(self) -> pd.DataFrame:
@@ -101,7 +109,7 @@ class Model:
         """
         if not hasattr(self, "_model") or not self._model:
             self._device = device
-            self._model = sparsechem.SparseFFN(self.conf).to(self._device)
+            self._model = sparsechem.SparseFFN(self._conf).to(self._device)
             state = torch.load(self._model_path, map_location=torch.device(self._device))
             self._model.load_state_dict(state)
 

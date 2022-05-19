@@ -13,7 +13,7 @@ from scipy.sparse import csr_matrix  # type: ignore
 from scipy.sparse import lil_matrix  # type: ignore
 from torch.utils.data import DataLoader
 
-from model_manipulation_software.model import Model
+from model_manipulation_software import Model
 
 
 class ModelUnknownError(Exception):

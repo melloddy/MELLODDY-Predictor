@@ -23,7 +23,7 @@ To install the package, run in a new python 3.8+ environment:
 To build the doc:
 
 ```sh
-pdoc --http localhost:8080 model_manipulation_software
+make doc
 ```
 
 Then in your browser, go to [http://localhost:8080/model_manipulation_software/](http://localhost:8080/model_manipulation_software/)

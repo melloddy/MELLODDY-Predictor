@@ -8,3 +8,7 @@ test: inputs
 	pytest .
 	pytest --nbmake "./examples/"
 	python ./examples/example.py
+
+.PHONY: doc
+doc:
+	pdoc --http localhost:8080 --config show_source_code=False model_manipulation_software
