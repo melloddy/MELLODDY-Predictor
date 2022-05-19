@@ -4,25 +4,22 @@
 
 To install the package, run in a new python 3.8+ environment:
 
-1. Install [git lfs](https://git-lfs.github.com/)
-
-   ```sh
-   git lfs install
-   ```
-
 1. Clone the repository
 
    ```sh
-   git clone git@github.com:owkin/melloddy_mms.git
+   git clone git@github.com:melloddy/MMS.git
    ```
 
-1. Install the requirements
+2. Install the requirements
 
    ```sh
    pip install -e ".[gitlab]"
    ```
 
-# Usage
+3. (Optional) To be able to run the examples and the tests, download the [dummy files](https://zenodo.org/record/6560873), extract the zip
+   and put the `inputs` folder in the repository.
+
+## Usage
 
 To build the doc:
 

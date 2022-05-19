@@ -1,6 +1,5 @@
 import os
 import pathlib
-from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -26,11 +25,6 @@ class PredictionSystem:
     Initialize the prediction system of the model manipulation software.
 
     Args:
-        model_folder (pathlib.Path): The path of the folder which contains all the models.
-            Each `model` is a folder `model_name` (used in the `predict` function) which contains:
-            - a `configuration` file `hyperparameters.json`
-            - a `model checkpoint` file `model.pth`
-            - `metadata` file(s) `T8_cls.csv` and/or `T8_reg.csv`
         encryption_key (pathlib.Path): Path of the encryption key `json` used to shuffle the bits of the descriptors
             (fingerprints) in `melloddy_tuner`.
             Ex: `inputs/config/example_key.json`.
@@ -48,7 +42,6 @@ class PredictionSystem:
     _device: str
     _tuner_encryption_key: pathlib.Path
     _tuner_configuration_parameters: pathlib.Path
-    _models: Dict[str, Model]
 
     def __init__(
         self,
@@ -62,8 +55,6 @@ class PredictionSystem:
             raise FileNotFoundError(preparation_parameters)
 
         self._device = device
-
-        self._models = {}
 
         self._tuner_encryption_key = encryption_key
         self._tuner_configuration_parameters = preparation_parameters

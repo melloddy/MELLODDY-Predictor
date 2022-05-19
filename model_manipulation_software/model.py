@@ -18,13 +18,21 @@ class Model:
     A sparsechem model and its configuration
 
     Args:
-        path (pathlib.Path): the path of the model's folder. Contains the files `hyperparameters.json` and `model.pth`.
-        "hyperparameters.json" should contain at least a "conf" dict with "input_transform" and "fold_inputs"
+        path (pathlib.Path): the path of the model's folder.
+            Contains:
+
+            * a configuration file `hyperparameters.json`: should contain at least a "conf" dict with
+                "input_transform" and "fold_inputs".
+            * a model checkpoint file `model.pth`
+            * metadata file(s) `T8_cls.csv` and/or `T8_reg.csv`
+
+            The model should be compatible with sparsechem 0.9.6+. If it is not, you can convert it with
+            [this script](https://git.infra.melloddy.eu/wp2/sparsechem/-/blob/convert_v0.9.5_to_v0.9.6/examples/chembl/convert.py).
 
     Raises:
         FileNotFoundError: path / "hyperparameters.json" not found
         FileNotFoundError: path / "model.pth" not found
-    """
+    """  # noqa: E501
 
     _conf: SimpleNamespace
     _model: sparsechem.SparseFFN
