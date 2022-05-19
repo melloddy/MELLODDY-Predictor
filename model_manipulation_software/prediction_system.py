@@ -16,15 +16,6 @@ from torch.utils.data import DataLoader
 
 from model_manipulation_software.model import Model
 
-STRUCTURE_FILE = "structure_file"
-CONFIG_FILE = "config_file"
-KEY_FILE = "key_file"
-RUN_NAME = "run_name"
-NUMBER_CPU = "number_cpu"
-REF_HASH = "ref_hash"
-NON_INTERACTIVE = "non_interactive"
-PREPARATION_RUN_NAME = "mms"
-
 
 class ModelUnknownError(Exception):
     pass
