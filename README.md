@@ -16,8 +16,7 @@ To install the package, run in a new python 3.8+ environment:
    pip install -e ".[gitlab]"
    ```
 
-3. (Optional) To be able to run the examples and the tests, download the [dummy files](https://zenodo.org/record/6560873), extract the zip
-   and put the `inputs` folder in the repository.
+3. (Optional) To be able to run the examples and the tests, download the [dummy files](https://zenodo.org/record/6560873). You can download it using `make inputs`. Otherwise download the archive, extract it an place the `inputs` folder at the root of the project.
 
 ## Usage
 
@@ -43,8 +42,10 @@ Install all the requirements
 pip install -r requirements-dev.txt
 ```
 
-We use pytest for testing, you can just run the following command to run the full test suite
+We use pytest for testing, you can just run the following command to run the full test suite:
 
 ```sh
-python -m pytest .
+make test
 ```
+
+Note that input data will be downloaded from Zenodo when running the tests for the first time.
