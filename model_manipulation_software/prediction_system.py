@@ -65,6 +65,8 @@ class PredictionSystem:
         smiles: pd.DataFrame,
         classification_tasks: Optional[List[int]] = None,
         regression_tasks: Optional[List[int]] = None,
+        batch_size: int = 4000,
+        num_workers: int = 4,
     ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """
         Predict on the test data (Smiles) with a given model.
@@ -78,6 +80,10 @@ class PredictionSystem:
             regression_tasks: A list of tasks indexes (`cont_regression_task_id` from the `metadata file`) for which
                 you want to predict. If not set it will predict on all regression tasks. If you don't want to predict
                 on any tasks you can sent an empty list.
+            batch_size: How many data samples should be loaded per batch
+                (see `torch.utils.data.DataLoader` for more details).
+            num_workers: How many subprocess we should use for data loading
+                (see `torch.utils.data.DataLoader` for more details).
 
         Returns:
             Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]: `cls_pred`, `reg_pred` and `failed_smiles`.
@@ -106,7 +112,11 @@ class PredictionSystem:
 
         dataset_te = sparsechem.ClassRegrSparseDataset(x=data, y_class=classification_mask, y_regr=regression_mask)
         loader = DataLoader(
-            dataset=dataset_te, batch_size=4000, num_workers=4, pin_memory=True, collate_fn=dataset_te.collate
+            dataset=dataset_te,
+            batch_size=batch_size,
+            num_workers=num_workers,
+            pin_memory=True,
+            collate_fn=dataset_te.collate,
         )
 
         model.load(self._device)
