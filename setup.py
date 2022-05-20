@@ -14,15 +14,14 @@ setup(
     version=about["__version__"],
     packages=find_packages(),
     install_requires=[
-        "numpy==1.22.3",
-        "pandas==1.4.1",
-        "jsonschema==4.4.0",
-        "pandera==0.9.0",
-        "scipy==1.8.0",
-        "rdkit-pypi==2021.9.5.1",
-        "dask==2022.3.0",
-        "torch==1.8.1",
-        "pandas==1.4.1",
+        "numpy==1.*",
+        "pandas==1.*",
+        "jsonschema",
+        "pandera",
+        "scipy==1.*",
+        "rdkit-pypi==2021.03.5",
+        "dask",
+        "pandas==1.*",
     ],
     extras_require={
         "gitlab": [
