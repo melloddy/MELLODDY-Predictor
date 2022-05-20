@@ -113,6 +113,8 @@ class PredictionSystem:
 
         cls_pred, reg_pred = model.predict(loader)
 
+        model.unload()
+
         for pred in [cls_pred, reg_pred]:
             pred.map_compound_ids(compound_ids)
 

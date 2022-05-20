@@ -1,6 +1,7 @@
 import os
 import pathlib
 from types import SimpleNamespace
+from typing import Optional
 from typing import Tuple
 
 import pandas as pd
@@ -43,7 +44,7 @@ class Model:
     """  # noqa: E501
 
     _internal_conf: SimpleNamespace
-    _model: sparsechem.SparseFFN
+    _model: Optional[sparsechem.SparseFFN]
 
     def __init__(self, path: pathlib.Path) -> None:
         self.path = path
@@ -112,6 +113,9 @@ class Model:
             self._model = sparsechem.SparseFFN(self._conf).to(self._device)
             state = torch.load(self._model_path, map_location=torch.device(self._device))
             self._model.load_state_dict(state)
+
+    def unload(self) -> None:
+        del self._model
 
     def predict(self, data: DataLoader) -> Tuple[Prediction, Prediction]:
         """Predicts using the model
