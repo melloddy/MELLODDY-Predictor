@@ -1,7 +1,7 @@
 """
 This module is used to generate predictions from a melloddy model.
 
-To use it, you have to create a `PredictionSystem` object, and then call the `PredictionSystem.predict` method.
+To use it, you have to create a `PreparedData` object and a `Model` object, and then call the `model.predict` method.
 
 Example:
     You can see an example in `examples/example.py` and run it with:
@@ -13,12 +13,12 @@ Example:
 """
 
 from model_manipulation_software.model import Model
-from model_manipulation_software.prediction_system import PredictionSystem
+from model_manipulation_software.prepared_data import PreparedData
 
-__all__ = ["PredictionSystem", "Model"]
+__all__ = ["PreparedData", "Model"]
 
 __pdoc__ = {
     "model": False,
-    "prediction_system": False,
+    "prepared_data": False,
     "predictions": False,
 }

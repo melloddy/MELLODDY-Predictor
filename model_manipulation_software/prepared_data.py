@@ -1,0 +1,88 @@
+import os
+import pathlib
+
+import melloddy_tuner.tunercli  # type: ignore
+import melloddy_tuner.utils.helper  # type: ignore
+import pandas as pd
+from scipy.sparse import csr_matrix  # type: ignore
+
+
+class PreparedData:
+    """
+    The data prepared by melloddy_tuner
+
+    Args:
+        encryption_key (pathlib.Path): Path of the encryption key `json` used to shuffle the bits of the descriptors
+            (fingerprints) in `melloddy_tuner`.
+            Ex: `inputs/config/example_key.json`.
+        preparation_parameters (pathlib.Path): Path of the parameters `json` to be used to prepare the dataset with
+            `melloddy_tuner`.
+            Ex: `inputs/config/example_parameters.json`.
+            More details in `melloddy_tuner`'s `README.md`, Section `# Parameter definitions`.
+        smiles (pd.DataFrame): The test data. A loaded T2 structure.
+
+    Raises:
+        FileNotFoundError: encryption_key not found
+        FileNotFoundError: preparation_parameters not found
+    """
+
+    _device: str
+    _tuner_encryption_key: pathlib.Path
+    _tuner_configuration_parameters: pathlib.Path
+    _data: csr_matrix
+    _df_failed: pd.DataFrame
+    _compound_ids: pd.DataFrame
+
+    def __init__(
+        self,
+        encryption_key: pathlib.Path,
+        preparation_parameters: pathlib.Path,
+        smiles: pd.DataFrame,
+    ):
+        if not os.path.isfile(encryption_key):
+            raise FileNotFoundError(encryption_key)
+        if not os.path.isfile(preparation_parameters):
+            raise FileNotFoundError(preparation_parameters)
+
+        self._tuner_encryption_key = encryption_key
+        self._tuner_configuration_parameters = preparation_parameters
+        data, df_failed, compound_mapping = melloddy_tuner.tunercli.do_prepare_prediction_online(
+            input_structure=smiles,
+            key_path=str(self._tuner_encryption_key),
+            config_file=str(self._tuner_configuration_parameters),
+            num_cpu=1,
+        )
+
+        compound_ids = compound_mapping["input_compound_id"].reset_index().drop("index", axis=1)
+        assert compound_ids["input_compound_id"].is_unique
+
+        self._data = data
+        self._df_failed = df_failed  # todo: warning
+        self._compound_ids = compound_ids
+
+    @property
+    def data(self) -> csr_matrix:
+        """
+        Returns:
+            csr_matrix: The prepared data / the x_matrix returned by melloddy_tuner
+        """
+        return self._data
+
+    @property
+    def failed_compounds(self) -> pd.DataFrame:
+        """
+        Returns:
+            pd.DataFrame: The failed compounds, the smiles which can't be processed.
+                The rows are the compounds ids (`input_compound_id` from the `smiles` file),
+                 and the column `error_message` contains the error returned by `melloddy_tuner`
+        """
+        return self._df_failed
+
+    @property
+    def compound_ids(self) -> pd.DataFrame:
+        """
+        Returns:
+            pd.DataFrame: a single column "input_compound_id" with the compound_ids in the same order as the data
+                and future predictions
+        """
+        return self._compound_ids
