@@ -29,15 +29,15 @@ class Model:
                 my_model/
                 ├─ hyperparameters.json
                 ├─ model.pth
-                ├─ T8_cls.csv
-                ├─ T8_reg.csv
+                ├─ T8c.csv
+                ├─ T8r.csv
 
             The `hyperparameters` file should contain at least a `conf` key with informations about the model.
             The T8 metadata files should be provided based on the kind of the model:
 
-            * CLS model: `T8_cls`.
-            * REG model: `T8_reg`.
-            * HYB model: `T8_cls` and `T8_reg`.
+            * CLS model: `T8c.csv`.
+            * REG model: `T8r.csv`.
+            * HYB model: `T8c.csv` and `T8r.csv`.
 
             The model should be compatible with `sparsechem` `0.9.6+`. If it is not, you can convert it with
             [this script](https://git.infra.melloddy.eu/wp2/sparsechem/-/blob/convert_v0.9.5_to_v0.9.6/examples/chembl/convert.py).
@@ -113,11 +113,11 @@ class Model:
 
     @property
     def _reg_metadata(self) -> pd.DataFrame:
-        return self._load_metadata("T8_reg.csv")
+        return self._load_metadata("T8r.csv")
 
     @property
     def _cls_metadata(self) -> pd.DataFrame:
-        return self._load_metadata("T8_cls.csv")
+        return self._load_metadata("T8c.csv")
 
     def _load_metadata(self, filename) -> pd.DataFrame:
         metadata_file = self.path / filename
