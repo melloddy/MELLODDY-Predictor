@@ -35,6 +35,10 @@ class ClassificationPrediction(Prediction):
             tasks = filtered_metadata["input_assay_id"].astype(str) + "_" + filtered_metadata["threshold"].astype(str)
             if not tasks.is_unique:
                 raise PredictionMappingError("Tasks are not unique")
+            if not len(self.pred.columns) == len(tasks):
+                raise PredictionMappingError(
+                    "The amount of tasks in the T8c file is different from the amout of tasks outputed by the model."
+                )
             self.pred.columns = tasks
 
 
@@ -45,4 +49,8 @@ class RegressionPrediction(Prediction):
             tasks = filtered_metadata["input_assay_id"].astype(str)
             if not tasks.is_unique:
                 raise PredictionMappingError("Tasks are not unique")
+            if not len(self.pred.columns) == len(tasks):
+                raise PredictionMappingError(
+                    "The amount of tasks in the T8c file is different from the amout of tasks outputed by the model."
+                )
             self.pred.columns = tasks
