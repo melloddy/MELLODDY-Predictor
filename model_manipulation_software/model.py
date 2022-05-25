@@ -55,6 +55,8 @@ class Model:
         self._conf_path = self.path / "hyperparameters.json"
         self._model_path = self.path / "model.pth"
         self._device = device
+        self._dropout = 0
+        self._y_cat_columns = None
 
         if not os.path.isfile(self._conf_path):
             raise FileNotFoundError(self._conf_path)
@@ -79,6 +81,22 @@ class Model:
             self._device = device
         else:
             raise Exception("cannot switch device when model is loaded")
+
+    @property
+    def dropout(self) -> int:
+        return self._dropout
+
+    @dropout.setter
+    def dropout(self, dropout: int):
+        self._dropout = dropout
+
+    @property
+    def y_cat_columns(self):
+        return self._y_cat_columns
+
+    @y_cat_columns.setter
+    def y_cat_columns(self, columns):
+        self._y_cat_columns = columns
 
     @property
     def _conf(self) -> SimpleNamespace:
@@ -190,7 +208,12 @@ class Model:
         self.load()
 
         cls_pred, reg_pred = sparsechem.predict_sparse(
-            net=self._model, loader=loader, dev=self._device, dropout=0, progress=False, y_cat_columns=None
+            net=self._model,
+            loader=loader,
+            dev=self._device,
+            dropout=self._dropout,
+            progress=False,
+            y_cat_columns=self._y_cat_columns,
         )
 
         cls_pred = ClassificationPrediction(cls_pred.toarray())
