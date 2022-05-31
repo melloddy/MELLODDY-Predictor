@@ -127,3 +127,34 @@ def test_failing_smiles():
     assert cls_pred.shape == (99, 2952)
     assert cls_pred.iloc[0][0] == pytest.approx(0.528646)
     assert reg_pred.shape == (99, 0)
+
+
+def test_load_on_demand():
+    df: pd.DataFrame = melloddy_tuner.utils.helper.read_input_file(str(SMILES_PATH))
+
+    prepared_data = PreparedData(
+        encryption_key=ENCRYPTION_KEY,
+        preparation_parameters=PREPARATION_PARAMETER,
+        smiles=df,
+    )
+
+    # test init True
+    model = Model(MODELS_PATH / "example_cls_model", load_on_demand=True)
+    assert not hasattr(model, "_model")
+    cls_pred, _ = model.predict(prepared_data)
+    assert cls_pred.iloc[0][0] == pytest.approx(0.528646)
+    assert not hasattr(model, "_model")
+
+    # test set False post init
+    model.load_on_demand = False
+    assert model._model
+    cls_pred, _ = model.predict(prepared_data)
+    assert cls_pred.iloc[0][0] == pytest.approx(0.528646)
+    assert model._model
+
+    # test init False
+    model = Model(MODELS_PATH / "example_cls_model", load_on_demand=False)
+    assert model._model
+    cls_pred, _ = model.predict(prepared_data)
+    assert cls_pred.iloc[0][0] == pytest.approx(0.528646)
+    assert model._model

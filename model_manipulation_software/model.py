@@ -42,6 +42,12 @@ class Model:
             The model should be compatible with `sparsechem` `0.9.6+`. If it is not, you can convert it with
             [this script](https://git.infra.melloddy.eu/wp2/sparsechem/-/blob/convert_v0.9.5_to_v0.9.6/examples/chembl/convert.py).
 
+        device (str): device on which we should load the model (cpu, cuda:0 .. cuda:x). Defaults to "cpu".
+        load_on_demand (bool): If `False`, the model will be loaded upon initialization and stay in memory
+            until `Model.unload()` is called or the model object is deleted.
+            If set to `True` (default), the model will be loaded into memory only when calling `Model.predict()`,
+            and unloaded before returning the results.
+
     Raises:
         FileNotFoundError: path / "hyperparameters.json" not found
         FileNotFoundError: path / "model.pth" not found
@@ -50,32 +56,34 @@ class Model:
     _internal_conf: SimpleNamespace
     _model: Optional[sparsechem.SparseFFN]
 
-    def __init__(self, path: pathlib.Path, device: str = "cpu") -> None:
+    def __init__(self, path: pathlib.Path, device: str = "cpu", load_on_demand: bool = True) -> None:
         self.path = path
         self._conf_path = self.path / "hyperparameters.json"
         self._model_path = self.path / "model.pth"
         self._device = device
         self._dropout = 0
         self._y_cat_columns = None
+        self._load_on_demand = load_on_demand
 
         if not os.path.isfile(self._conf_path):
             raise FileNotFoundError(self._conf_path)
         if not os.path.isfile(self._model_path):
             raise FileNotFoundError(self._model_path)
 
+        if not self._load_on_demand:
+            self.load()
+
     @property
     def device(self) -> str:
         """
-        Returns:
-            str: device on which we should load the model (cpu, cuda:0 .. cuda:x)
+        cf class docstring
         """
         return self._device
 
     @device.setter
     def device(self, device: str):
         """
-        Args:
-            device (str): device on which we should load the model (cpu, cuda:0 .. cuda:x). Defaults to "cpu".
+        cf class docstring
         """
         if not self._model:
             self._device = device
@@ -83,19 +91,47 @@ class Model:
             raise Exception("cannot switch device when model is loaded")
 
     @property
+    def load_on_demand(self) -> bool:
+        """
+        cf class docstring
+        """
+        return self._load_on_demand
+
+    @load_on_demand.setter
+    def load_on_demand(self, load_on_demand: bool):
+        """
+        cf class docstring
+        """
+        self._load_on_demand = load_on_demand
+        if not self._load_on_demand:
+            self.load()
+
+    @property
     def dropout(self) -> int:
+        """
+        Used as an argument of `sparsechem.predict_sparse()` in `Model.predict()`
+        """
         return self._dropout
 
     @dropout.setter
     def dropout(self, dropout: int):
+        """
+        Used as an argument of `sparsechem.predict_sparse()` in `Model.predict()`
+        """
         self._dropout = dropout
 
     @property
     def y_cat_columns(self):
+        """
+        Used as an argument of `sparsechem.predict_sparse()` in `Model.predict()`
+        """
         return self._y_cat_columns
 
     @y_cat_columns.setter
     def y_cat_columns(self, columns):
+        """
+        Used as an argument of `sparsechem.predict_sparse()` in `Model.predict()`
+        """
         self._y_cat_columns = columns
 
     @property
@@ -164,7 +200,7 @@ class Model:
         num_workers: int = 4,
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
-        Predict on the test data (Smiles) using the model
+        Predict on the test data (Smiles) using the model.
 
         Args:
             prepared_data (PreparedData): The data prepared by melloddy_tuner.
@@ -224,7 +260,8 @@ class Model:
         if reg_pred.has_tasks():
             reg_pred.map_task_ids(self._reg_metadata)
 
-        self.unload()
+        if self._load_on_demand:
+            self.unload()
 
         for pred in [cls_pred, reg_pred]:
             pred.map_compound_ids(prepared_data.compound_ids)

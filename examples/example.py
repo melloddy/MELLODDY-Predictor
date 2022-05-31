@@ -15,9 +15,11 @@ prepared_data = PreparedData(
     smiles=df,
 )
 
-model = Model(Path("inputs/models/example_cls_model"))
+model = Model(Path("inputs/models/example_cls_model"), load_on_demand=False)
 
 cls_pred, reg_pred = model.predict(prepared_data=prepared_data, classification_tasks=[0, 1, 2])
+
+model.unload()
 
 print("\n cls_pred dataframe : \n")
 print(cls_pred.head(10))
