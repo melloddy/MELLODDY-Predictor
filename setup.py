@@ -4,12 +4,12 @@ from setuptools import find_packages
 from setuptools import setup
 
 about: dict = dict()
-version_path = pathlib.Path(__file__).parent / "model_manipulation_software" / "__version__.py"
+version_path = pathlib.Path(__file__).parent / "melloddy_predictor" / "__version__.py"
 with version_path.open("r", encoding="utf-8") as fp:
     exec(fp.read(), about)
 
 setup(
-    name="model_manipulation_software",
+    name="melloddy_predictor",
     python_requires=">=3.8.0",
     version=about["__version__"],
     packages=find_packages(),
@@ -27,6 +27,7 @@ setup(
         "gitlab": [
             "melloddy_tuner@git+ssh://git@git.infra.melloddy.eu/wp1/data_prep.git@develop",
             "sparsechem@git+ssh://git@git.infra.melloddy.eu/wp2/sparsechem.git@master",
+            "protobuf==3.20.*",
         ],
     },
 )

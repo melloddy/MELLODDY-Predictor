@@ -12,8 +12,8 @@ Example:
 
 """
 
-from model_manipulation_software.model import Model
-from model_manipulation_software.prepared_data import PreparedData
+from melloddy_predictor.model import Model
+from melloddy_predictor.prepared_data import PreparedData
 
 __all__ = ["PreparedData", "Model"]
 

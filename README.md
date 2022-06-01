@@ -31,7 +31,7 @@ To build the doc:
 make doc
 ```
 
-Then in your browser, go to [http://localhost:8080/model_manipulation_software/](http://localhost:8080/model_manipulation_software/)
+Then in your browser, go to [http://localhost:8080/melloddy_predictor/](http://localhost:8080/melloddy_predictor/)
 
 You can see an example in `example.py` and run it with:
 

@@ -3,8 +3,8 @@ from pathlib import Path
 import melloddy_tuner.utils.helper  # type: ignore
 import pandas as pd
 
-from model_manipulation_software import Model
-from model_manipulation_software import PreparedData
+from melloddy_predictor import Model
+from melloddy_predictor import PreparedData
 
 smiles_path = Path("inputs/data/T2_100samples.csv")
 df: pd.DataFrame = melloddy_tuner.utils.helper.read_input_file(str(smiles_path))

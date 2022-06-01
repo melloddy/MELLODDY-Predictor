@@ -6,9 +6,9 @@ inputs:
 .PHONY: test
 test: inputs
 	pytest ./tests/
-	pytest --nbmake "./tests/examples/"
+	pytest --nbmake "./examples/"
 	python ./examples/example.py
 
 .PHONY: doc
 doc:
-	pdoc --http localhost:8080 --config show_source_code=False model_manipulation_software
+	pdoc --http localhost:8080 --config show_source_code=False melloddy_predictor

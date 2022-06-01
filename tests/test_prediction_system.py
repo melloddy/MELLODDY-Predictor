@@ -5,8 +5,8 @@ import melloddy_tuner.utils.helper  # type: ignore
 import pandas as pd
 import pytest
 
-from model_manipulation_software import Model
-from model_manipulation_software import PreparedData
+from melloddy_predictor import Model
+from melloddy_predictor import PreparedData
 
 TEST_FILE_DIR = os.path.dirname(__file__)
 MODELS_PATH = pathlib.Path(f"{TEST_FILE_DIR}/../inputs/models")

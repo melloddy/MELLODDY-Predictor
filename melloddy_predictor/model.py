@@ -13,9 +13,9 @@ from scipy.sparse import csr_matrix  # type: ignore
 from scipy.sparse import lil_matrix
 from torch.utils.data import DataLoader
 
-from model_manipulation_software.predictions import ClassificationPrediction
-from model_manipulation_software.predictions import RegressionPrediction
-from model_manipulation_software.prepared_data import PreparedData  # type: ignore
+from melloddy_predictor.predictions import ClassificationPrediction
+from melloddy_predictor.predictions import RegressionPrediction
+from melloddy_predictor.prepared_data import PreparedData  # type: ignore
 
 
 class Model:
