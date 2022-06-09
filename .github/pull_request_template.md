@@ -15,4 +15,4 @@
 <!--- your change affects other areas of the code, etc. -->
 
 ## Ping Reviewers
-@predictor-users
+@melloddy/predictor-users
