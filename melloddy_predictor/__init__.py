@@ -1,7 +1,7 @@
 """
 This module is used to generate predictions from a melloddy model.
 
-To use it, you have to create a `PreparedData` object and a `Model` object, and then call the `model.predict` method.
+To use it, you have to create a `PreparedData` object and a `Model` object, and then call the `Model.predict` method.
 
 Example:
     You can see an example in `examples/example.py` and run it with:
