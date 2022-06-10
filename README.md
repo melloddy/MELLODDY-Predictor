@@ -12,7 +12,7 @@ To install the package, run in a new python 3.8+ environment:
 1. Clone the repository
 
    ```sh
-   git clone git@github.com:melloddy/MMS.git
+   git clone git@github.com:melloddy/MELLODDY-Predictor.git
    ```
 
 2. Install the requirements
@@ -25,7 +25,7 @@ To install the package, run in a new python 3.8+ environment:
 
 ## Usage
 
-To build the doc:
+To build the doc, run in a new terminal with your python environment:
 
 ```sh
 make doc
@@ -36,10 +36,10 @@ Then in your browser, go to [http://localhost:8080/melloddy_predictor/](http://l
 You can see an example in `example.py` and run it with:
 
 ```sh
-python example.py
+python examples/example.py
 ```
 
-### Development & Testing
+## Development & Testing
 
 Install all the requirements
 
@@ -54,3 +54,17 @@ make test
 ```
 
 Note that input data will be downloaded from Zenodo when running the tests for the first time.
+
+## Troubleshooting
+
+If you want to remove the following warning:
+
+```
+[W ParallelNative.cpp:206] Warning: Cannot set number of intraop threads after parallel work has started or after set_num_threads call when using native parallel backend (function set_num_threads)
+```
+
+run:
+
+```sh
+export OMP_NUM_THREADS=1
+```
