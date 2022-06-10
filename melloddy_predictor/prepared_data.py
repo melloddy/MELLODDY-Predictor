@@ -19,6 +19,7 @@ import melloddy_tuner.tunercli  # type: ignore
 import melloddy_tuner.utils.helper  # type: ignore
 import pandas as pd
 from scipy.sparse import csr_matrix  # type: ignore
+import warnings
 
 
 class PreparedData:
@@ -38,6 +39,7 @@ class PreparedData:
     Raises:
         FileNotFoundError: encryption_key not found
         FileNotFoundError: preparation_parameters not found
+        Warning: if some SMILES failed to be prepared.
     """
 
     _device: str
@@ -67,11 +69,23 @@ class PreparedData:
             num_cpu=1,
         )
 
+        if not df_failed.empty:
+            warnings.warn(
+                f"""
+{len(df_failed)} SMILES failed to be prepared.
+These SMILES will be ignored during the prediction.
+You can use the `failed_compounds` attribute to get the failing SMILES dataframe.
+Preview of failing SMILES:
+{df_failed}
+                """,
+                Warning,
+            )
+
         compound_ids = compound_mapping["input_compound_id"].reset_index().drop("index", axis=1)
         assert compound_ids["input_compound_id"].is_unique
 
         self._data = data
-        self._df_failed = df_failed  # todo: warning
+        self._df_failed = df_failed
         self._compound_ids = compound_ids
 
     @property
