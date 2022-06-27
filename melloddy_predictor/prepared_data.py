@@ -14,12 +14,12 @@
 
 import os
 import pathlib
+import warnings
 
 import melloddy_tuner.tunercli  # type: ignore
 import melloddy_tuner.utils.helper  # type: ignore
 import pandas as pd
 from scipy.sparse import csr_matrix  # type: ignore
-import warnings
 
 
 class PreparedData:
