@@ -13,6 +13,7 @@ To install the package, run in a new python 3.8+ environment:
 
    ```sh
    git clone git@github.com:melloddy/MELLODDY-Predictor.git
+   cd MELLODDY-Predictor
    ```
 
 2. Install the requirements

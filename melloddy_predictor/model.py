@@ -164,6 +164,21 @@ class Model:
         return self._internal_conf
 
     @property
+    def _stats(self) -> SimpleNamespace:
+        """
+        The stats of the model, which contains the "stats" values of the "hyperparameters.json", used for
+        `inverse_normalization` in `sparsechem` (only for reg and hyb models)
+
+        Returns:
+            dict : stats
+        """
+        if not hasattr(self, "_internal_conf") or not self._internal_conf:
+            self._internal_stats: SimpleNamespace = sparsechem.load_results(str(self._conf_path), two_heads=True)[
+                "stats"
+            ]
+        return self._internal_stats
+
+    @property
     def _class_output_size(self) -> str:
         return self._conf.class_output_size
 
@@ -265,6 +280,11 @@ class Model:
             progress=False,
             y_cat_columns=self._y_cat_columns,
         )
+
+        if reg_pred:
+            reg_pred = sparsechem.inverse_normalization(
+                reg_pred, mean=np.array(self._stats["mean"]), variance=np.array(self._stats["var"]), array=True
+            )
 
         cls_pred = ClassificationPrediction(cls_pred.toarray())
         reg_pred = RegressionPrediction(reg_pred.toarray())
