@@ -30,24 +30,16 @@ SMILES_PATH = pathlib.Path(f"{TEST_FILE_DIR}/../inputs/data/T2_100samples.csv")
 
 
 @pytest.mark.parametrize(
-    ["model", "expected_shapes", "expected_values"],
+    ["model", "is_reg", "is_cls"],
     [
-        (
-            "example_cls_model",
-            [(100, 2952), (100, 0)],  # TODO: directly use class_output_size from hps
-            [pytest.approx(0.528646), None],
-        ),
-        ("example_clsaux_model", [(100, 3466), (100, 0)], [pytest.approx(0.639690), None]),
-        ("example_reg_model", [(100, 0), (100, 1587)], [None, pytest.approx(5.645558)]),
-        (
-            "example_hyb_model",
-            [(100, 2952), (100, 1587)],
-            [pytest.approx(0.730933), pytest.approx(5.949892)],
-        ),
+        ("example_cls_model", False, True),
+        ("example_clsaux_model", False, True),
+        ("example_reg_model", True, False),
+        ("example_hyb_model", True, True),
     ],
 )
 @pytest.mark.slow
-def test_prediction_system(model, expected_values, expected_shapes):
+def test_prediction_system(model, is_reg, is_cls):
     df: pd.DataFrame = melloddy_tuner.utils.helper.read_input_file(str(SMILES_PATH))
 
     prepared_data = PreparedData(
@@ -62,21 +54,26 @@ def test_prediction_system(model, expected_values, expected_shapes):
 
     cls_pred, reg_pred = model.predict(prepared_data)
 
-    # This is definitely not a great test but it is better than nothing
+    if is_reg:
+        assert model._regr_output_size > 0
+        assert all(pd.notna(reg_pred))  # all predictions are not NaN
+        assert not reg_pred.eq(0).any().any()  # no zero values
+
+    if is_cls:
+        assert model._class_output_size > 0
+        assert all(pd.notna(cls_pred))
+        assert not cls_pred.eq(0).any().any()
+
     assert failing_smiles.empty  # no failing data
-    assert cls_pred.shape == expected_shapes[0]
-    assert reg_pred.shape == expected_shapes[1]
+
+    assert cls_pred.shape == (df.shape[0], model._class_output_size)
+    assert reg_pred.shape == (df.shape[0], model._regr_output_size)
 
     assert cls_pred.columns.is_unique
     assert cls_pred.index.is_unique  # input_compound_id
 
     assert reg_pred.columns.is_unique
     assert reg_pred.index.is_unique
-
-    if expected_values[0] is not None:
-        assert cls_pred.iloc[0][0] == expected_values[0]
-    if expected_values[1] is not None:
-        assert reg_pred.iloc[0][0] == expected_values[1]
 
 
 def test_prediction_on_subset_of_tasks():
@@ -91,10 +88,11 @@ def test_prediction_on_subset_of_tasks():
 
     model = Model(MODELS_PATH / "example_cls_model")
 
-    cls_pred, _ = model.predict(prepared_data, classification_tasks=[24])
+    index = 24
+    cls_pred, _ = model.predict(prepared_data, classification_tasks=[index])
 
-    assert cls_pred.iloc[0][1] == 0
-    assert cls_pred.iloc[0][24] == pytest.approx(0.34870466589927673)
+    assert cls_pred.drop(index=index).eq(0).all()  # all predictions are 0 except for index
+    assert not cls_pred.iloc[:, index].eq(0).any()  # no zero values
 
 
 def test_prediction_on_multiple_models():
@@ -112,8 +110,16 @@ def test_prediction_on_multiple_models():
     cls_pred, _ = model.predict(prepared_data)
     _, reg_pred = model2.predict(prepared_data)
 
-    assert cls_pred.iloc[0][0] == pytest.approx(0.528646)
-    assert reg_pred.iloc[0][0] == pytest.approx(5.949892)
+    assert model._regr_output_size > 0
+    assert all(pd.notna(reg_pred))  # all predictions are not NaN
+    assert not reg_pred.eq(0).any().any()  # no zero values
+
+    assert model._class_output_size > 0
+    assert all(pd.notna(cls_pred))
+    assert not cls_pred.eq(0).any().any()
+
+    assert cls_pred.shape == (df.shape[0], model._class_output_size)
+    assert reg_pred.shape == (df.shape[0], model2._regr_output_size)
 
 
 def test_failing_smiles():
@@ -133,14 +139,12 @@ def test_failing_smiles():
 
     cls_pred, reg_pred = model.predict(prepared_data)
 
-    # This is definitely not a great test but it is better than nothing
-    # cls model:
     assert failing_smiles.shape == (1, 2)
     assert failing_smiles["input_compound_id"][0] == 1376019
     assert "number of non-H atoms 155 exceeds limit of 100 for smiles" in str(failing_smiles["error_message"][0])
-    assert cls_pred.shape == (99, 2952)
-    assert cls_pred.iloc[0][0] == pytest.approx(0.528646)
-    assert reg_pred.shape == (99, 0)
+    assert cls_pred.shape == (df.shape[0] - 1, model._class_output_size)
+
+    assert reg_pred.shape == (df.shape[0] - 1, model._regr_output_size)
 
 
 def test_load_on_demand():
@@ -156,19 +160,19 @@ def test_load_on_demand():
     model = Model(MODELS_PATH / "example_cls_model", load_on_demand=True)
     assert not hasattr(model, "_model")
     cls_pred, _ = model.predict(prepared_data)
-    assert cls_pred.iloc[0][0] == pytest.approx(0.528646)
+    assert cls_pred.shape == (df.shape[0], model._class_output_size)
     assert not hasattr(model, "_model")
 
     # test set False post init
     model.load_on_demand = False
     assert model._model
     cls_pred, _ = model.predict(prepared_data)
-    assert cls_pred.iloc[0][0] == pytest.approx(0.528646)
+    assert cls_pred.shape == (df.shape[0], model._class_output_size)
     assert model._model
 
     # test init False
     model = Model(MODELS_PATH / "example_cls_model", load_on_demand=False)
     assert model._model
     cls_pred, _ = model.predict(prepared_data)
-    assert cls_pred.iloc[0][0] == pytest.approx(0.528646)
+    assert cls_pred.shape == (df.shape[0], model._class_output_size)
     assert model._model

@@ -172,7 +172,7 @@ class Model:
         Returns:
             dict : stats
         """
-        if not hasattr(self, "_internal_conf") or not self._internal_conf:
+        if not hasattr(self, "_internal_stats") or not self._internal_stats:
             self._internal_stats: SimpleNamespace = sparsechem.load_results(str(self._conf_path), two_heads=True)[
                 "stats"
             ]
@@ -281,7 +281,7 @@ class Model:
             y_cat_columns=self._y_cat_columns,
         )
 
-        if reg_pred:
+        if reg_pred.shape[1] != 0:
             reg_pred = sparsechem.inverse_normalization(
                 reg_pred, mean=np.array(self._stats["mean"]), variance=np.array(self._stats["var"]), array=True
             )
