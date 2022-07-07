@@ -58,6 +58,10 @@ def test_prediction_system(model, is_reg, is_cls):
         assert model._regr_output_size > 0
         assert all(pd.notna(reg_pred))  # all predictions are not NaN
         assert not reg_pred.eq(0).any().any()  # no zero values
+        # test that we apply the inverse normalization to the regression predictions
+        assert (
+            reg_pred.iloc[0][0] > 1
+        )  # first value become > 1 when the inverse_normalization is applied (observed with the example models)
 
     if is_cls:
         assert model._class_output_size > 0

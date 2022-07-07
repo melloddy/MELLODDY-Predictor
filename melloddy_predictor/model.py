@@ -281,6 +281,7 @@ class Model:
             y_cat_columns=self._y_cat_columns,
         )
 
+        # apply inverse_normalization on the regression predictions if they are not empty (reg/hyb models)
         if reg_pred.shape[1] != 0:
             reg_pred = sparsechem.inverse_normalization(
                 reg_pred, mean=np.array(self._stats["mean"]), variance=np.array(self._stats["var"]), array=True

@@ -22,7 +22,7 @@ To install the package, run in a new python 3.8+ environment:
    pip install -e ".[gitlab]"
    ```
 
-3. (Optional) To be able to run the examples and the tests, download the [dummy files](https://zenodo.org/record/6579398/). You can download it using `make inputs`. Otherwise download the archive, extract it an place the `inputs` folder at the root of the project.
+3. (Optional) To be able to run the examples and the tests, download the [dummy files](https://zenodo.org/record/6807845/). You can download it using `make inputs`. Otherwise download the archive, extract it an place the `inputs` folder at the root of the project.
 
 ## Usage
 
