@@ -164,7 +164,7 @@ class Model:
         return self._internal_conf
 
     @property
-    def _stats(self) -> SimpleNamespace:
+    def _stats(self) -> dict:
         """
         The stats of the model, which contains the "stats" values of the "hyperparameters.json", used for
         `inverse_normalization` in `sparsechem` (only for reg and hyb models)
@@ -173,9 +173,7 @@ class Model:
             dict : stats
         """
         if not hasattr(self, "_internal_stats") or not self._internal_stats:
-            self._internal_stats: SimpleNamespace = sparsechem.load_results(str(self._conf_path), two_heads=True)[
-                "stats"
-            ]
+            self._internal_stats: dict = sparsechem.load_results(str(self._conf_path), two_heads=True)["stats"]
         return self._internal_stats
 
     @property
