@@ -91,7 +91,7 @@ def test_prediction_on_subset_of_tasks():
     index = 24
     cls_pred, _ = model.predict(prepared_data, classification_tasks=[index])
 
-    assert cls_pred.drop(index=index).eq(0).all()  # all predictions are 0 except for index
+    assert cls_pred.drop(cls_pred.columns[index], axis=1).eq(0).all().all()  # all predictions are 0 except for index
     assert not cls_pred.iloc[:, index].eq(0).any()  # no zero values
 
 
@@ -110,7 +110,7 @@ def test_prediction_on_multiple_models():
     cls_pred, _ = model.predict(prepared_data)
     _, reg_pred = model2.predict(prepared_data)
 
-    assert model._regr_output_size > 0
+    assert model2._regr_output_size > 0
     assert all(pd.notna(reg_pred))  # all predictions are not NaN
     assert not reg_pred.eq(0).any().any()  # no zero values
 
