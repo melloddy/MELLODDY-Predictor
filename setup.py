@@ -36,6 +36,7 @@ setup(
         "rdkit-pypi==2021.03.5",
         "dask",
         "pandas==1.*",
+        "pdoc3==0.10.*",
     ],
     extras_require={
         "gitlab": [
