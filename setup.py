@@ -39,8 +39,8 @@ setup(
     ],
     extras_require={
         "gitlab": [
-            "melloddy_tuner@git+ssh://git@gitlab.com:melloddy/wp1/data_prep.git@develop",
-            "sparsechem@git+ssh://git@gitlab.com:melloddy/wp2/sparsechem.git@master",
+            "melloddy_tuner@git+ssh://git@gitlab.com/melloddy/wp1/data_prep.git@develop",
+            "sparsechem@git+ssh://git@gitlab.com/melloddy/wp2/sparsechem.git",
             "protobuf==3.20.*",
         ],
     },
