@@ -36,13 +36,15 @@ setup(
         "rdkit-pypi==2021.03.5",
         "dask",
         "pandas==1.*",
-        "pdoc3==0.10.*",
     ],
     extras_require={
         "gitlab": [
             "melloddy_tuner@git+ssh://git@gitlab.com/melloddy/wp1/data_prep.git@develop",
             "sparsechem@git+ssh://git@gitlab.com/melloddy/wp2/sparsechem.git",
             "protobuf==3.20.*",
+        ],
+        "doc": [
+            "pdoc3==0.10.*",
         ],
     },
 )
