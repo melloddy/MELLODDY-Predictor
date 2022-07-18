@@ -65,6 +65,6 @@ class RegressionPrediction(Prediction):
                 raise PredictionMappingError("Tasks are not unique")
             if not len(self.pred.columns) == len(tasks):
                 raise PredictionMappingError(
-                    "The amount of tasks in the T8c file is different from the amout of tasks outputed by the model."
+                    "The amount of tasks in the T8r file is different from the amout of tasks outputed by the model."
                 )
             self.pred.columns = tasks

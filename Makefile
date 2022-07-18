@@ -1,5 +1,5 @@
 inputs:
-	curl -s -o inputs.zip https://zenodo.org/record/6579398/files/mms.zip?download=1
+	curl -s -o inputs.zip https://zenodo.org/record/6807845/files/inputs.zip?download=1
 	unzip inputs.zip
 	rm inputs.zip
 
