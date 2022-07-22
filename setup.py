@@ -24,7 +24,7 @@ with version_path.open("r", encoding="utf-8") as fp:
 
 setup(
     name="melloddy_predictor",
-    python_requires=">=3.8.0",
+    python_requires=">=3.8.0,<3.10.0",  # rdkit-pypi==2021.03.5 incompatible with 3.10.0 (Issue #4)
     version=about["__version__"],
     packages=find_packages(),
     install_requires=[
