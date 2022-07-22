@@ -130,12 +130,16 @@ def test_failing_smiles():
     smiles_path = pathlib.Path(f"{TEST_FILE_DIR}/../inputs/data/T2_100samples_failing.csv")
 
     df: pd.DataFrame = melloddy_tuner.utils.helper.read_input_file(str(smiles_path))
+    error_message = "number of non-H atoms 155 exceeds limit of 100"
 
-    prepared_data = PreparedData(
-        encryption_key=ENCRYPTION_KEY,
-        preparation_parameters=PREPARATION_PARAMETER,
-        smiles=df,
-    )
+    with pytest.warns() as warnings:
+        prepared_data = PreparedData(
+            encryption_key=ENCRYPTION_KEY,
+            preparation_parameters=PREPARATION_PARAMETER,
+            smiles=df,
+        )
+
+    assert any([error_message in str(w.message) for w in warnings])
 
     failing_smiles = prepared_data.failed_compounds
 
@@ -145,7 +149,7 @@ def test_failing_smiles():
 
     assert failing_smiles.shape == (1, 2)
     assert failing_smiles["input_compound_id"][0] == 1376019
-    assert "number of non-H atoms 155 exceeds limit of 100 for smiles" in str(failing_smiles["error_message"][0])
+    assert error_message in str(failing_smiles["error_message"][0])
     assert cls_pred.shape == (df.shape[0] - 1, model._class_output_size)
 
     assert reg_pred.shape == (df.shape[0] - 1, model._regr_output_size)
