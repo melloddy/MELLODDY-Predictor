@@ -43,6 +43,11 @@ setup(
             "sparsechem@git+ssh://git@gitlab.com/melloddy/wp2/sparsechem.git",
             "protobuf==3.20.*",
         ],
+        "github": [
+            "melloddy_tuner@git+ssh://git@github.com/MELLODDY/MELLODDY-TUNER.git@master",
+            "sparsechem@git+ssh://git@github.com/MELLODDY/SparseChem.git@master",
+            "protobuf==3.20.*",
+        ],
         "doc": [
             "pdoc3==0.10.*",
         ],
