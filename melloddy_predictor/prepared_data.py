@@ -35,6 +35,7 @@ class PreparedData:
             Ex: `inputs/config/example_parameters.json`.
             More details in `melloddy_tuner`'s `README.md`, Section `# Parameter definitions`.
         smiles (pd.DataFrame): The test data. A loaded T2 structure.
+        num_cpu (int): The number of CPUs to use in the data preparation by tuner
 
     Raises:
         FileNotFoundError: encryption_key not found
@@ -48,12 +49,14 @@ class PreparedData:
     _data: csr_matrix
     _df_failed: pd.DataFrame
     _compound_ids: pd.DataFrame
+    _num_cpu: int
 
     def __init__(
         self,
         encryption_key: pathlib.Path,
         preparation_parameters: pathlib.Path,
         smiles: pd.DataFrame,
+        num_cpu: int
     ):
         if not os.path.isfile(encryption_key):
             raise FileNotFoundError(encryption_key)
@@ -62,11 +65,13 @@ class PreparedData:
 
         self._tuner_encryption_key = encryption_key
         self._tuner_configuration_parameters = preparation_parameters
+        self._num_cpu = num_cpu
+
         data, df_failed, compound_mapping = melloddy_tuner.tunercli.do_prepare_prediction_online(
             input_structure=smiles,
             key_path=str(self._tuner_encryption_key),
             config_file=str(self._tuner_configuration_parameters),
-            num_cpu=1,
+            num_cpu=self._num_cpu,
         )
 
         if not df_failed.empty:
