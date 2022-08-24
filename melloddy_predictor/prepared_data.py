@@ -56,7 +56,7 @@ class PreparedData:
         encryption_key: pathlib.Path,
         preparation_parameters: pathlib.Path,
         smiles: pd.DataFrame,
-        num_cpu: int
+        num_cpu: int,
     ):
         if not os.path.isfile(encryption_key):
             raise FileNotFoundError(encryption_key)
