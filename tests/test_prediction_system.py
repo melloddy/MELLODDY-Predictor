@@ -27,6 +27,7 @@ MODELS_PATH = pathlib.Path(f"{TEST_FILE_DIR}/../inputs/models")
 ENCRYPTION_KEY = pathlib.Path(f"{TEST_FILE_DIR}/../inputs/config/example_key.json")
 PREPARATION_PARAMETER = pathlib.Path(f"{TEST_FILE_DIR}/../inputs/config/example_parameters.json")
 SMILES_PATH = pathlib.Path(f"{TEST_FILE_DIR}/../inputs/data/T2_100samples.csv")
+NUM_CPU = 1
 
 
 @pytest.mark.parametrize(
@@ -46,6 +47,7 @@ def test_prediction_system(model, is_reg, is_cls):
         encryption_key=ENCRYPTION_KEY,
         preparation_parameters=PREPARATION_PARAMETER,
         smiles=df,
+        num_cpu=NUM_CPU,
     )
 
     failing_smiles = prepared_data.failed_compounds
@@ -88,6 +90,7 @@ def test_prediction_on_subset_of_tasks():
         encryption_key=ENCRYPTION_KEY,
         preparation_parameters=PREPARATION_PARAMETER,
         smiles=df,
+        num_cpu=NUM_CPU,
     )
 
     model = Model(MODELS_PATH / "example_cls_model")
@@ -106,6 +109,7 @@ def test_prediction_on_multiple_models():
         encryption_key=ENCRYPTION_KEY,
         preparation_parameters=PREPARATION_PARAMETER,
         smiles=df,
+        num_cpu=NUM_CPU,
     )
 
     model = Model(MODELS_PATH / "example_cls_model")
@@ -137,6 +141,7 @@ def test_failing_smiles():
             encryption_key=ENCRYPTION_KEY,
             preparation_parameters=PREPARATION_PARAMETER,
             smiles=df,
+            num_cpu=NUM_CPU,
         )
 
     assert any([error_message in str(w.message) for w in warnings])
@@ -162,6 +167,7 @@ def test_load_on_demand():
         encryption_key=ENCRYPTION_KEY,
         preparation_parameters=PREPARATION_PARAMETER,
         smiles=df,
+        num_cpu=NUM_CPU,
     )
 
     # test init True

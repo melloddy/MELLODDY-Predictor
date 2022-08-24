@@ -27,6 +27,7 @@ prepared_data = PreparedData(
     encryption_key=Path("inputs/config/example_key.json"),
     preparation_parameters=Path("inputs/config/example_parameters.json"),
     smiles=df,
+    num_cpu=1,
 )
 
 model = Model(Path("inputs/models/example_cls_model"), load_on_demand=False)
