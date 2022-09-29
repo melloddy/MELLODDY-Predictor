@@ -3,7 +3,7 @@
 This open-source software is a Python package made for external data scientists without high knowledge of the MELLODDY stack to perform predictions on new data easily, from the models produced during the yearly runs. It is built on top of `Melloddy-Tuner` and `Sparsechem` to manage both data pre-processing and model inference steps. It is flexible enough to handle multiple models and data size, and predict on subset on tasks.
 
 > :warning: The model should be compatible with `sparsechem` `0.9.6+`. If it is not, you can convert it with
-[the `convert.py` script](https://git.infra.melloddy.eu/wp2/sparsechem/-/blob/convert_v0.9.5_to_v0.9.6/examples/chembl/convert.py) from `sparsechem`.
+[the `convert.py` script](https://gitlab.com/melloddy/wp2/sparsechem/-/blob/convert_v0.9.5_to_v0.9.6/examples/chembl/convert.py) from `sparsechem`.
 
 ## Installation
 
