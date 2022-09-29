@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 
+- fix: convert script link
 - fix: rdkit-python incompatibility #4 (#8)
 
 ## [0.1.0](https://github.com/melloddy/MELLODDY-Predictor/releases/tag/1.0.0) - 2022-06-01
