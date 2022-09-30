@@ -225,6 +225,7 @@ class Model:
         regression_tasks: Optional[List[int]] = None,
         batch_size: int = 4000,
         num_workers: int = 4,
+        return_trunk_embeddings: bool = False,
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         Predict on the test data (Smiles) using the model.
@@ -241,15 +242,19 @@ class Model:
                 (see `torch.utils.data.DataLoader` for more details).
             num_workers: How many subprocess we should use for data loading
                 (see `torch.utils.data.DataLoader` for more details).
+            return_trunk_embeddings: If True, return trunk embeddings (before non-linearity, e.g relu,tanh) instead of Yhat
 
         Returns:
-            Tuple[pd.DataFrame, pd.DataFrame]: `cls_pred` and `reg_pred`
-            - `cls_pred`: the prediction dataframe for classification tasks: the columns are the tasks
-                (`input_assay_id`_`threshold` from the `classification metadata` file) and the rows are the compounds
-                ids (`input_compound_id` from the `smiles` file).
-            - `reg_pred`: the prediction dataframe for regression tasks: the columns are the tasks (`input_assay_id`
-                from the `regression metadata` file) and the rows are the compounds ids (`input_compound_id` from the
-                `smiles` file).
+            if return_trunk_embeddings is set to True:
+                np.ndarray: trunk embeddings (hidden values for all compounds)
+            else:
+                Tuple[pd.DataFrame, pd.DataFrame]: `cls_pred` and `reg_pred`
+                - `cls_pred`: the prediction dataframe for classification tasks: the columns are the tasks
+                    (`input_assay_id`_`threshold` from the `classification metadata` file) and the rows are the compounds
+                    ids (`input_compound_id` from the `smiles` file).
+                - `reg_pred`: the prediction dataframe for regression tasks: the columns are the tasks (`input_assay_id`
+                    from the `regression metadata` file) and the rows are the compounds ids (`input_compound_id` from the
+                    `smiles` file).
         """
 
         data = sparsechem.fold_transform_inputs(
@@ -269,6 +274,16 @@ class Model:
         )
 
         self.load()
+
+        if return_trunk_embeddings:
+            # return only hidden layer
+            return sparsechem.predict_hidden(
+                net=self._model,
+                loader=loader,
+                dev=self._device,
+                dropout=self._dropout,
+                progress=False,
+            ).numpy()
 
         cls_pred, reg_pred = sparsechem.predict_sparse(
             net=self._model,
