@@ -54,7 +54,7 @@ class Model:
             * HYB model: `T8c.csv` and `T8r.csv`.
 
             The model should be compatible with `sparsechem` `0.9.6+`. If it is not, you can convert it with
-            [this script](https://git.infra.melloddy.eu/wp2/sparsechem/-/blob/convert_v0.9.5_to_v0.9.6/examples/chembl/convert.py).
+            [this script](https://gitlab.com/melloddy/wp2/sparsechem/-/blob/convert_v0.9.5_to_v0.9.6/examples/chembl/convert.py).
 
         device (str): device on which we should load the model (cpu, cuda:0 .. cuda:x). Defaults to "cpu".
         load_on_demand (bool): If `False`, the model will be loaded upon initialization and stay in memory
