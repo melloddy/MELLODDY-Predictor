@@ -242,7 +242,8 @@ class Model:
                 (see `torch.utils.data.DataLoader` for more details).
             num_workers: How many subprocess we should use for data loading
                 (see `torch.utils.data.DataLoader` for more details).
-            return_trunk_embeddings: If True, return trunk embeddings (before non-linearity, e.g relu,tanh) instead of Yhat
+            return_trunk_embeddings: If True, return trunk embeddings (before non-linearity, e.g relu,tanh) instead of
+                Yhat
 
         Returns:
             if return_trunk_embeddings is set to True:
@@ -250,11 +251,11 @@ class Model:
             else:
                 Tuple[pd.DataFrame, pd.DataFrame]: `cls_pred` and `reg_pred`
                 - `cls_pred`: the prediction dataframe for classification tasks: the columns are the tasks
-                    (`input_assay_id`_`threshold` from the `classification metadata` file) and the rows are the compounds
-                    ids (`input_compound_id` from the `smiles` file).
+                    (`input_assay_id`_`threshold` from the `classification metadata` file) and the rows are the
+                    compounds ids (`input_compound_id` from the `smiles` file).
                 - `reg_pred`: the prediction dataframe for regression tasks: the columns are the tasks (`input_assay_id`
-                    from the `regression metadata` file) and the rows are the compounds ids (`input_compound_id` from the
-                    `smiles` file).
+                    from the `regression metadata` file) and the rows are the compounds ids (`input_compound_id` from
+                    the `smiles` file).
         """
 
         data = sparsechem.fold_transform_inputs(
