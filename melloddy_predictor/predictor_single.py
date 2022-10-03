@@ -13,7 +13,8 @@ import warnings
 
 def csr_to_torch_coo(csr_mat: csr_matrix) -> torch.Tensor:
     """
-    Converts from scipy sparse csr matrix to a torch sparsae_coo_tensor
+    Converts from scipy sparse csr matrix to a torch sparsae_coo_tensor to be submitted to the sparsechem network
+	Sparsewchem requires 
     
     Args:
         csr_matx (scipy.sparse.csr_matrix) sprse csr matrix to convert
@@ -69,10 +70,13 @@ class PredictorSingle:
         # if inverse normalization is done load the stats
         self.inverse_normalization = self.conf.inverse_normalization
         if self.inverse_normalization:
-            self.stats = results_loaded["stats"]
+            stats = results_loaded["stats"]
+            self.reg_mean = np.array(stats["mean"])
+            self.reg_var = np.array(stats["var"])
+            self.reg_stddev = np.sqrt(self.reg_var)
         
         if self.net.cat_id_size is not None:
-            raise NotImplementedError("Predictions using a catalog head are not yet implemented")
+            raise NotImplementedError("Predictions for models with a catalog head are not yet implemented")
         
         self.has_task_maps = False
         if (class_task_map is not None) or (class_task_map is not None):
@@ -161,10 +165,11 @@ class PredictorSingle:
             else:
                 y_class, y_regr, yc_cat = self.net(X.to(self.device))
             y_class_array = torch.sigmoid(y_class).cpu().numpy()
-            y_regr_array =  y_regr.cpu()
+            y_regr_array =  y_regr.cpu().numpy()
             if self.inverse_normalization:
-                y_regr_array  = sc.inverse_normalization(y_regr_array , mean=np.array(self.stats["mean"]), \
-                                                         variance=np.array(self.stats["var"]), array=True)
+                #y_regr_array  = sc.inverse_normalization(csr_matrix(y_regr_array) , mean=self.reg_mean, \
+                #                                         variance=self.reg_var, array=True)
+                y_regr_array = y_regr_array * self.reg_stddev + self.reg_mean
         return y_class_array, y_regr_array
 
     
