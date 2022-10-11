@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - feat: warn if failing SMILES (#3)
 - feat: use inverse_normalization for reg and hyb models (#7)
+- feat: Output Trunk Embeddings
+  added `return_trunk_embeddings` arg to `predict` function
 
 ## Fixed
 

@@ -190,3 +190,30 @@ def test_load_on_demand():
     cls_pred, _ = model.predict(prepared_data)
     assert cls_pred.shape == (df.shape[0], model._class_output_size)
     assert model._model
+
+
+@pytest.mark.parametrize(
+    ["model", "trunk_size"],
+    [
+        ("example_cls_model", 600),
+        ("example_clsaux_model", 600),
+        ("example_reg_model", 300),
+        ("example_hyb_model", 300),
+    ],
+)
+@pytest.mark.slow
+def test_trunk_embeddings(model, trunk_size):
+    df: pd.DataFrame = melloddy_tuner.utils.helper.read_input_file(str(SMILES_PATH))
+
+    prepared_data = PreparedData(
+        encryption_key=ENCRYPTION_KEY,
+        preparation_parameters=PREPARATION_PARAMETER,
+        smiles=df,
+        num_cpu=NUM_CPU,
+    )
+
+    model = Model(MODELS_PATH / model)
+
+    trunk_embeddings = model.predict(prepared_data, return_trunk_embeddings=True)
+
+    assert trunk_embeddings.shape == (df.shape[0], trunk_size)
