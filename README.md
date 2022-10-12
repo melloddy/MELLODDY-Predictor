@@ -16,10 +16,10 @@ To install the package, run in a new python 3.8+ environment:
    cd MELLODDY-Predictor
    ```
 
-2. Install the package and its requirements. You can remove `gitlab` if you already installed `melloddy_tuner` and `sparsechem`. You can remove `doc` if you don't want to build it.
+2. Install the package and its requirements. You can remove `github` if you already installed `melloddy_tuner` and `sparsechem`. You can remove `doc` if you don't want to build it.
 
    ```sh
-   pip install -e ".[gitlab,doc]"
+   pip install -e ".[github,doc]"
    ```
 
 3. (Optional) To be able to run the examples and the tests, download the [dummy files](https://zenodo.org/record/6807845/). You can download it using `make inputs`. Otherwise download the archive, extract it an place the `inputs` folder at the root of the project.

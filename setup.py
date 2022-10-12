@@ -38,9 +38,9 @@ setup(
         "pandas==1.*",
     ],
     extras_require={
-        "gitlab": [
-            "melloddy_tuner@git+ssh://git@gitlab.com/melloddy/wp1/data_prep.git@develop",
-            "sparsechem@git+ssh://git@gitlab.com/melloddy/wp2/sparsechem.git",
+        "github": [
+            "melloddy_tuner@git+https://git@github.com/MELLODDY/MELLODDY-TUNER.git@master",
+            "sparsechem@git+https://git@github.com/MELLODDY/SparseChem.git@master",
             "protobuf==3.20.*",
         ],
         "doc": [
