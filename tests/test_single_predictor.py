@@ -34,7 +34,7 @@ def ref_row_mapping_table():
 
 @pytest.fixture
 def srprep():
-    return SingleRowPreparator(PREPARATION_PARAMETER, ENCRYPTION_KEY)
+    return SingleRowPreparator(secret = ENCRYPTION_KEY, params = PREPARATION_PARAMETER)
 
 @pytest.fixture
 def ref_output_ydata():
