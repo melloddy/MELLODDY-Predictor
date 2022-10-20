@@ -94,7 +94,7 @@ class PredictorSingle:
             self.model_type = ScModelType.regression
 
         self.has_task_maps = False
-        if (class_task_map is not None) or (class_task_map is not None):
+        if (class_task_map is not None) or (regr_task_map is not None):
             self.set_tasks_maps(class_task_map, regr_task_map)
         
 
@@ -125,7 +125,7 @@ class PredictorSingle:
             return self.mapped_task_type_info.index.values
 
     def get_model_type(self):
-        return self.model.type
+        return self.model_type
 
     def get_mapped_task_type(self):
         if self.has_task_maps:
@@ -360,7 +360,7 @@ class PredictorSingle:
             numpy.ndarray of hidden layer values
         """
         X = csr_to_torch_coo(x_csr)
-        return self.predict_hidden_from_tensor(X)        
+        return self.predict_hidden_from_tensor(X)
         
         
 
@@ -399,4 +399,4 @@ def t8df_to_task_map(t8_df: pd.DataFrame, task_type: str, name_column : str = "i
     return pd.Series(task_ids.values, index = task_labels)
 
 
-            
+
