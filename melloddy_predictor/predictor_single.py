@@ -229,8 +229,8 @@ class PredictorSingle:
             y_class_array = torch.sigmoid(y_class).cpu().numpy()
             y_regr_array =  y_regr.cpu().numpy()
             if self.inverse_normalization:
-                y_regr_array  = sc.inverse_normalization(csr_matrix(y_regr_array) , mean=self.reg_mean, \
-                                                         variance=self.reg_var, array=True)
+                #y_regr_array  = sc.inverse_normalization(csr_matrix(y_regr_array) , mean=self.reg_mean, \
+                #                                         variance=self.reg_var, array=True)
                 y_regr_array = y_regr_array * self.reg_stddev + self.reg_mean
         return y_class_array, y_regr_array
 
