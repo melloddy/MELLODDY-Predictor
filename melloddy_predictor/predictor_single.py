@@ -365,7 +365,7 @@ class PredictorSingle:
         
 
 
-def t8df_to_task_map(t8_df: pd.DataFrame, task_type: str, name_column : str = "input_assay_id", concat_task_tye : bool = False, concat_threshold : bool = True) -> pd.Series:
+def t8df_to_task_map(t8_df: pd.DataFrame, task_type: str, name_column : str = "input_assay_id", concat_task_tye : bool = False, threshold_multi_ix = False, concat_threshold : bool = True) -> pd.Series:
     """
     This function extracts from a t8 type dataframe (or a selected slice thereof) a task_map for the predictor object
     
@@ -377,26 +377,34 @@ def t8df_to_task_map(t8_df: pd.DataFrame, task_type: str, name_column : str = "i
         concat_threshold (bool):  If set to true for classification tasks the threshold value will be appended to the task name
     
     """
+    temp_df = t8_df.copy()
     if not task_type in ["classification","regression"]:
         raise ValueError("Task type must be either \"classification\" or \"regression\", passed type is {0}".format(task_type)) 
     task_id_column = "cont_{0}_task_id".format(task_type)
-    if not task_id_column in t8_df:
+    if not task_id_column in temp_df:
         raise ValueError("task index column \"{0}\" is not present in the task dataframe".format(task_id_column))
-    if t8_df[task_id_column].isnull().any():
+    if temp_df[task_id_column].isnull().any():
         raise ValueError("Null value task indices are present in data frame")    
-    task_ids = t8_df[task_id_column].astype(int)
-    if not name_column in t8_df:
+    task_ids = temp_df[task_id_column].astype(int)
+    if not name_column in temp_df:
         raise ValueError("task name column \"{0}\" is not present in the task dataframe".format(name_column))
-    task_labels = t8_df[task_id_column].copy().astype(str)
+    temp_df["task_labels"] = temp_df[task_id_column].astype(str)
     if concat_task_tye:
-        task_labels = task_type + '_' + task_labels
-    if task_type == "classification" and concat_threshold:
-        if not "threshold" in t8_df:
+        temp_df["task_labels"] = task_type + '_' + temp_df["task_labels"]
+    if task_type == "classification" and (concat_threshold or threshold_multi_ix):
+        if not "threshold" in temp_df:
             raise ValueError("option \"concat_threshold\" was chosen, but \"threshold\" column not present in dataframe")
-        task_labels = task_labels +  "_" + t8_df["threshold"].astype(str)
-    if not task_labels.is_unique:
-        raise ValueError("task labels are not unique, try to use a diffeent name column, and/or make use of concat_threshold option")
-    return pd.Series(task_ids.values, index = task_labels)
+        if concat_threshold:
+            temp_df["task_labels"] = temp_df["task_labels"] +  "_" + temp_df["threshold"].astype(str)
+        elif threshold_multi_ix:
+            temp_df["threshold"] = temp_df["threshold"].astype(float)
+    if task_type == "classification" and threshold_multi_ix:
+        temp_df = temp_df.set_index(["task_labels","threshold"])
+    else:
+        temp_df = temp_df.set_index("task_labels")
+    if not temp_df.index.is_unique:
+        raise ValueError("task labels are not unique, try to use a diffeent name column, and/or make use of concat_threshold or  option")
+    return tempd_df[task_id_column]
 
 
 
