@@ -57,6 +57,7 @@ class PredictorSingle:
         self.conf  = results_loaded["conf"]
         self.device = device
         self.net = sc.SparseFFN(self.conf).to(self.device)
+        self.inverse_normalization = False
         state_dict = torch.load(model, map_location=torch.device(self.device))
 
         if self.conf.model_type == "federated":
@@ -76,8 +77,8 @@ class PredictorSingle:
         if self.dropout:
             self.net.apply(sc.utils.enable_dropout) 
         # if inverse normalization is done load the stats
-        self.inverse_normalization = self.conf.inverse_normalization
-        if self.inverse_normalization:
+        if 'stats' in results_loaded:
+            self.inverse_normalization = True
             stats = results_loaded["stats"]
             self.reg_mean = np.array(stats["mean"])
             self.reg_var = np.array(stats["var"])
@@ -228,8 +229,8 @@ class PredictorSingle:
             y_class_array = torch.sigmoid(y_class).cpu().numpy()
             y_regr_array =  y_regr.cpu().numpy()
             if self.inverse_normalization:
-                #y_regr_array  = sc.inverse_normalization(csr_matrix(y_regr_array) , mean=self.reg_mean, \
-                #                                         variance=self.reg_var, array=True)
+                y_regr_array  = sc.inverse_normalization(csr_matrix(y_regr_array) , mean=self.reg_mean, \
+                                                         variance=self.reg_var, array=True)
                 y_regr_array = y_regr_array * self.reg_stddev + self.reg_mean
         return y_class_array, y_regr_array
 
