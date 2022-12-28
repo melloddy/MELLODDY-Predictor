@@ -83,7 +83,6 @@ def test_prediction_system(model, is_reg, is_cls):
 
 
 def test_prediction_on_subset_of_tasks():
-
     df: pd.DataFrame = melloddy_tuner.utils.helper.read_input_file(str(SMILES_PATH))
 
     prepared_data = PreparedData(
@@ -144,7 +143,7 @@ def test_failing_smiles():
             num_cpu=NUM_CPU,
         )
 
-    assert any([error_message in str(w.message) for w in warnings])
+    assert any(error_message in str(w.message) for w in warnings)
 
     failing_smiles = prepared_data.failed_compounds
 

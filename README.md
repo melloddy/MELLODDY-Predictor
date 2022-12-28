@@ -56,6 +56,18 @@ make test
 
 Note that input data will be downloaded from Zenodo when running the tests for the first time.
 
+To set up pre-commits, you can run:
+
+```bash
+pre-commit install
+```
+
+to lint all files, you can run
+
+```bash
+make pre-commit-checks
+```
+
 ## Troubleshooting
 
 If you want to remove the following warning:

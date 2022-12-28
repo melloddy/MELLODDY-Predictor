@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-This module is used to generate predictions from a melloddy model.
+"""This module is used to generate predictions from a melloddy model.
 
 To use it, you have to create a `PreparedData` object and a `Model` object, and then call the `Model.predict` method.
 
@@ -23,7 +22,6 @@ Example:
         $ python example.py
 
     Or you can use the Jupyter Notebook provided in the `examples/` folder.
-
 """
 
 from melloddy_predictor.model import Model

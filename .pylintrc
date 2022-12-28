@@ -1,0 +1,49 @@
+[MAIN]
+fail-under = 9.99
+load-plugins=
+    pylint.extensions.check_elif,
+    pylint.extensions.bad_builtin,
+    pylint.extensions.docparams,
+    pylint.extensions.for_any_all,
+    pylint.extensions.set_membership,
+    pylint.extensions.code_style,
+    pylint.extensions.overlapping_exceptions,
+    pylint.extensions.typing,
+    pylint.extensions.redefined_variable_type,
+    pylint.extensions.comparison_placement,
+
+[MESSAGES CONTROL]
+disable =
+    too-many-instance-attributes,
+    too-few-public-methods,
+    too-many-public-methods,
+    too-many-arguments,
+    too-many-locals,
+    redefined-outer-name,
+    fixme,
+    import-error,
+    unspecified-encoding,
+    missing-function-docstring,
+    missing-class-docstring,
+    missing-module-docstring,
+    broad-except,
+    consider-using-assignment-expr,
+    duplicate-code,
+
+[BASIC]
+good-names = a,aa,b,bb,c,cc,f,ff,i,ii,j,jj,k,kk,n,nn,p,pp,r,rr,s,ss,t,tt,u,uu,v,vv,w,x,xx,y,yy,z,zz,id,_,df,X, ex
+good-names-rgxs = X_[a-zA-Z]*
+
+[FORMAT]
+max-line-length = 120
+max-module-lines = 1500
+
+[SIMILARITIES]
+ignore-imports = yes
+min-similarity-lines = 10
+
+[TYPING]
+runtime-typing = yes
+
+[TYPECHECK]
+generated-members=numpy.*,torch.*

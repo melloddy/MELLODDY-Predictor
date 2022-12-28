@@ -15,9 +15,7 @@
 import os
 import pathlib
 from types import SimpleNamespace
-from typing import List
 from typing import Optional
-from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -33,8 +31,7 @@ from melloddy_predictor.prepared_data import PreparedData  # type: ignore
 
 
 class Model:
-    """
-    A sparsechem model and its configuration
+    """A sparsechem model and its configuration.
 
     Args:
         path (pathlib.Path): the path of the model's folder.
@@ -65,9 +62,10 @@ class Model:
     Raises:
         FileNotFoundError: path / "hyperparameters.json" not found
         FileNotFoundError: path / "model.pth" not found
-    """  # noqa: E501
+    """  # noqa: E501, C0301 # pylint: disable=line-too-long
 
     _internal_conf: SimpleNamespace
+    _internal_stats: dict
     _model: Optional[sparsechem.SparseFFN]
 
     def __init__(self, path: pathlib.Path, device: str = "cpu", load_on_demand: bool = True) -> None:
@@ -89,16 +87,12 @@ class Model:
 
     @property
     def device(self) -> str:
-        """
-        cf class docstring
-        """
+        """Cf class docstring."""
         return self._device
 
     @device.setter
     def device(self, device: str):
-        """
-        cf class docstring
-        """
+        """Cf class docstring."""
         if not self._model:
             self._device = device
         else:
@@ -106,52 +100,41 @@ class Model:
 
     @property
     def load_on_demand(self) -> bool:
-        """
-        cf class docstring
-        """
+        """Cf class docstring."""
         return self._load_on_demand
 
     @load_on_demand.setter
     def load_on_demand(self, load_on_demand: bool):
-        """
-        cf class docstring
-        """
+        """Cf class docstring."""
         self._load_on_demand = load_on_demand
         if not self._load_on_demand:
             self.load()
 
     @property
     def dropout(self) -> int:
-        """
-        Used as an argument of `sparsechem.predict_sparse()` in `Model.predict()`
-        """
+        """Used as an argument of `sparsechem.predict_sparse()` in `Model.predict()`"""
         return self._dropout
 
     @dropout.setter
     def dropout(self, dropout: int):
-        """
-        Used as an argument of `sparsechem.predict_sparse()` in `Model.predict()`
-        """
+        """Used as an argument of `sparsechem.predict_sparse()` in `Model.predict()`"""
         self._dropout = dropout
 
     @property
     def y_cat_columns(self):
-        """
-        Used as an argument of `sparsechem.predict_sparse()` in `Model.predict()`
-        """
+        """Used as an argument of `sparsechem.predict_sparse()` in `Model.predict()`"""
         return self._y_cat_columns
 
     @y_cat_columns.setter
     def y_cat_columns(self, columns):
-        """
-        Used as an argument of `sparsechem.predict_sparse()` in `Model.predict()`
-        """
+        """Used as an argument of `sparsechem.predict_sparse()` in `Model.predict()`"""
         self._y_cat_columns = columns
 
     @property
     def _conf(self) -> SimpleNamespace:
-        """
-        The configuration of the model, which contains the "conf" values of the "hyperparameters.json" as well as
+        """The configuration of the model, which contains the "conf" values of the
+        "hyperparameters.json" as well as.
+
             - "model_type"
             - "class_output_size"
             - "regr_output_size"
@@ -165,9 +148,9 @@ class Model:
 
     @property
     def _stats(self) -> dict:
-        """
-        The stats of the model, which contains the "stats" values of the "hyperparameters.json", used for
-        `inverse_normalization` in `sparsechem` (only for reg and hyb models)
+        """The stats of the model, which contains the "stats" values of the
+        "hyperparameters.json", used for `inverse_normalization` in `sparsechem` (only
+        for reg and hyb models)
 
         Returns:
             dict : stats
@@ -208,27 +191,26 @@ class Model:
         return data if isinstance(data, pd.DataFrame) else pd.DataFrame()
 
     def load(self) -> None:
-        """Loads the model on the specified device"""
+        """Loads the model on the specified device."""
         if not hasattr(self, "_model") or not self._model:
             self._model = sparsechem.SparseFFN(self._conf).to(self._device)
             state = torch.load(self._model_path, map_location=torch.device(self._device))
             self._model.load_state_dict(state)
 
     def unload(self) -> None:
-        """Remove the model from the device"""
+        """Remove the model from the device."""
         del self._model
 
     def predict(
         self,
         prepared_data: PreparedData,
-        classification_tasks: Optional[List[int]] = None,
-        regression_tasks: Optional[List[int]] = None,
+        classification_tasks: Optional[list[int]] = None,
+        regression_tasks: Optional[list[int]] = None,
         batch_size: int = 4000,
         num_workers: int = 4,
         return_trunk_embeddings: bool = False,
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        """
-        Predict on the test data (Smiles) using the model.
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Predict on the test data (Smiles) using the model.
 
         Args:
             prepared_data (PreparedData): The data prepared by melloddy_tuner.
@@ -249,7 +231,7 @@ class Model:
             if return_trunk_embeddings is set to True:
                 np.ndarray: trunk embeddings (hidden values for all compounds)
             else:
-                Tuple[pd.DataFrame, pd.DataFrame]: `cls_pred` and `reg_pred`
+                tuple[pd.DataFrame, pd.DataFrame]: `cls_pred` and `reg_pred`
                 - `cls_pred`: the prediction dataframe for classification tasks: the columns are the tasks
                     (`input_assay_id`_`threshold` from the `classification metadata` file) and the rows are the
                     compounds ids (`input_compound_id` from the `smiles` file).
@@ -312,17 +294,18 @@ class Model:
         if self._load_on_demand:
             self.unload()
 
-        for pred in [cls_pred, reg_pred]:
+        for pred in (cls_pred, reg_pred):
             pred.map_compound_ids(prepared_data.compound_ids)
 
         return cls_pred.dataframe, reg_pred.dataframe
 
 
-def prediction_mask(shape: Tuple[int, int], tasks_ids: Optional[List[int]]) -> csr_matrix:
-    """produce a mask that will be used for prediction
+def prediction_mask(shape: tuple[int, int], tasks_ids: Optional[list[int]]) -> csr_matrix:
+    """Produce a mask that will be used for prediction.
 
-    Based on tasks_ids, we fill the columns with 1 to produce a mask that will generate prediction for this columns
-    if tasks_ids is set to None we predict for all columns. If set to [] we don't predict for any column.
+    Based on tasks_ids, we fill the columns with 1 to produce a mask that will generate
+    prediction for this columns if tasks_ids is set to None we predict for all columns.
+    If set to [] we don't predict for any column.
     """
     mask = lil_matrix(shape, dtype=np.float32)
 
