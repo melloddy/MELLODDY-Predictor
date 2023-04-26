@@ -23,8 +23,7 @@ from scipy.sparse import csr_matrix  # type: ignore
 
 
 class PreparedData:
-    """
-    The data prepared by melloddy_tuner
+    """The data prepared by melloddy_tuner.
 
     Args:
         encryption_key (pathlib.Path): Path of the encryption key `json` used to shuffle the bits of the descriptors
