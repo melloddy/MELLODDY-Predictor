@@ -65,7 +65,7 @@ pre-commit install
 to lint all files, you can run
 
 ```bash
-make pre-commit-checks
+make lint
 ```
 
 ## Troubleshooting
