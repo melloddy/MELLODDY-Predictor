@@ -13,5 +13,5 @@ test: inputs
 doc:
 	pdoc --http localhost:8080 --config show_source_code=False melloddy_predictor
 
-pre-commit-checks: ## Run pre-commit checks on all files
+lint: ## Run pre-commit checks on all files
 	pre-commit run --hook-stage manual --all-files
