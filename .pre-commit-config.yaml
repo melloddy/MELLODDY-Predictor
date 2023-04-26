@@ -1,92 +1,79 @@
 repos:
 - repo: local
   hooks:
-    - id: docformatter
-      name: Format docstrings with `docformatter`
-      language: system
-      types: [python]
-      require_serial: true
-      entry:  docformatter
-      args: [
-        --in-place, --wrap-summaries=88, --wrap-descriptions=87, --recursive
-      ]
-      files: ^(melloddy_predictor|tests|examples)/
--   repo: local
-    hooks:
-    - id: isort
-      name: Sorting imports with `isort`
-      language: system
-      types: [python]
-      require_serial: true
-      entry:  isort
-      files: ^(melloddy_predictor|tests|examples)/
--   repo: local
-    hooks:
-    - id: black
-      name: Formatting files with `black`
-      language: system
-      types: [python]
-      require_serial: true
-      entry:  black
-      args: [
-        --preview,
-        --line-length=120,
-      ]
-      files: ^(melloddy_predictor|tests|examples)/
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
-    hooks:
-    - id: trailing-whitespace
-      name: Trim trailing whitespace
-    - id: end-of-file-fixer
-      name: Fix end of files
-      exclude: \.ipynb$
--   repo: local
-    hooks:
-    - id: autoflake
-      name: auto fix some flake errors
-      language: system
-      types: [python]
-      require_serial: true
-      entry: autoflake
-      files: ^(melloddy_predictor|tests|examples)/
--   repo: local
-    hooks:
-    - id: flake8
-      name: Test linting with `flake8`
-      language: system
-      types: [python]
-      require_serial: true
-      entry:  flake8
-      files: ^(melloddy_predictor|tests|examples)/
--   repo: local
-    hooks:
-    - id: pylint
-      name: Test linting with `pylint`
-      entry: pylint
-      language: system
-      types: [python]
-      require_serial: true
-      files: ^(melloddy_predictor|examples)/
-      args: [
-        "--rcfile=.pylintrc",
-      ]
--   repo: local
-    hooks:
-    - id: mypy
-      name: Test typing with `mypy`
-      language: system
-      types: [python]
-      require_serial: true
-      entry:  mypy
-      files: ^(melloddy_predictor)/
--  repo: local
-   hooks:
-    - id: jupyter-nb-clear-output
-      name: Clear Jupyter notebook outputs
-      files: \.ipynb$
-      language: system
-      entry:  jupyter nbconvert
-      args: [
-        --ClearOutputPreprocessor.enabled=True, --inplace,
-      ]
+  - id: docformatter
+    name: Format docstrings with `docformatter`
+    language: system
+    types: [python]
+    require_serial: true
+    entry:  docformatter
+    args: [
+      --in-place, --wrap-summaries=88, --wrap-descriptions=87, --recursive
+    ]
+    files: ^(melloddy_predictor|tests|examples)/
+  - id: isort
+    name: Sorting imports with `isort`
+    language: system
+    types: [python]
+    require_serial: true
+    entry:  isort
+    files: ^(melloddy_predictor|tests|examples)/
+  - id: black
+    name: Formatting files with `black`
+    language: system
+    types: [python]
+    require_serial: true
+    entry:  black
+    args: [
+      --preview,
+      --line-length=120,
+    ]
+    files: ^(melloddy_predictor|tests|examples)/
+  - id: autoflake
+    name: auto fix some flake errors
+    language: system
+    types: [python]
+    require_serial: true
+    entry: autoflake
+    files: ^(melloddy_predictor|tests|examples)/
+  - id: flake8
+    name: Test linting with `flake8`
+    language: system
+    types: [python]
+    require_serial: true
+    entry:  flake8
+    files: ^(melloddy_predictor|tests|examples)/
+  - id: pylint
+    name: Test linting with `pylint`
+    entry: pylint
+    language: system
+    types: [python]
+    require_serial: true
+    files: ^(melloddy_predictor|examples)/
+    args: [
+      "--rcfile=.pylintrc",
+    ]
+  - id: mypy
+    name: Test typing with `mypy`
+    language: system
+    types: [python]
+    require_serial: true
+    entry:  mypy
+    files: ^(melloddy_predictor)/
+  - id: jupyter-nb-clear-output
+    name: Clear Jupyter notebook outputs
+    files: \.ipynb$
+    language: system
+    entry:  jupyter nbconvert
+    args: [
+      --ClearOutputPreprocessor.enabled=True, --inplace,
+    ]
+
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.3.0
+  hooks:
+  - id: trailing-whitespace
+    name: Trim trailing whitespace
+  - id: end-of-file-fixer
+    name: Fix end of files
+    exclude: \.ipynb$
