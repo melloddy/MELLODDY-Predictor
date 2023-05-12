@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- feat: single row predictor (#20)
+- feat: flexible number of cpus in data prep (#14)
 - feat: warn if failing SMILES (#3)
 - feat: use inverse_normalization for reg and hyb models (#7)
-- feat: Output Trunk Embeddings
+- feat: Output Trunk Embeddings (#19)
   added `return_trunk_embeddings` arg to `predict` function
 
 ## Fixed

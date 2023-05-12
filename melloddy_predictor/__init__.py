@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """This module is used to generate predictions from a melloddy model.
 
 To use it, you have to create a `PreparedData` object and a `Model` object, and then call the `Model.predict` method.
