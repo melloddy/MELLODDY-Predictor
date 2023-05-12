@@ -60,6 +60,9 @@ repos:
     require_serial: true
     entry:  mypy
     files: ^(melloddy_predictor)/
+    args: [
+      "--ignore-missing-imports",  # sparsechem and scipy.sparse are missing library stubs or py.typed marker
+    ]
   - id: jupyter-nb-clear-output
     name: Clear Jupyter notebook outputs
     files: \.ipynb$

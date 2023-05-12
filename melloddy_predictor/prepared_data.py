@@ -83,6 +83,7 @@ Preview of failing SMILES:
 {df_failed}
                 """,
                 Warning,
+                stacklevel=2,
             )
 
         compound_ids = compound_mapping["input_compound_id"].reset_index().drop("index", axis=1)
