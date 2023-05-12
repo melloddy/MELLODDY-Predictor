@@ -24,3 +24,5 @@ jobs:
           pip install -e .
       - name: run pre-commit checks
         run: make lint
+      - name: run tests
+        run: make test
