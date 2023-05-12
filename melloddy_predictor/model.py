@@ -96,7 +96,7 @@ class Model:
         if not self._model:
             self._device = device
         else:
-            raise Exception("cannot switch device when model is loaded")
+            raise Warning("cannot switch device when model is loaded")
 
     @property
     def load_on_demand(self) -> bool:

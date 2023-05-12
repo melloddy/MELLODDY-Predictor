@@ -67,7 +67,7 @@ class PredictorSingle:
         self.device = device
         self.net = sc.SparseFFN(self.conf).to(self.device)
         self.inverse_normalization = False
-        state_dict = torch.load(model, map_location=torch.device(self.device))
+        state_dict = OrderedDict(torch.load(model, map_location=torch.device(self.device)))
 
         if self.conf.model_type == "federated":
             state_dict_new = OrderedDict()
@@ -248,9 +248,9 @@ class PredictorSingle:
         # don't compute gradients
         with torch.no_grad():
             if self.net.cat_id_size is None:
-                y_class, y_regr = self.net(X.to(self.device))
+                y_class, y_regr = self.net.forward(X.to(self.device))
             else:
-                y_class, y_regr, _ = self.net(X.to(self.device))
+                y_class, y_regr, _ = self.net.forward(X.to(self.device))
             y_class_array = torch.sigmoid(y_class).cpu().numpy()
             y_regr_array = y_regr.cpu().numpy()
             if self.inverse_normalization:
@@ -384,7 +384,7 @@ class PredictorSingle:
         """
 
         with torch.no_grad():
-            return self.net(X.to(self.device), trunk_embeddings=True).cpu().numpy()
+            return self.net.forward(X.to(self.device), trunk_embeddings=True).cpu().numpy()
 
 
 def t8df_to_task_map(
